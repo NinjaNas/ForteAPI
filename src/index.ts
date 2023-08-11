@@ -50,6 +50,8 @@ fs.readFile("./data/set_classes.json", "utf8")
 const filterFunc = (q: string, prop: string) => {
 	if (q === "null") {
 		return (e: { [key: string]: string }) => e[prop] === null;
+	} else if (q.at(0) === "^" && q.at(-1) === "$") {
+		return (e: { [key: string]: string }) => e[prop] === q.slice(1, q.length - 1);
 	} else if (q.at(0) === "^") {
 		return (e: { [key: string]: string }) => e[prop] && e[prop].startsWith(q.slice(1));
 	} else if (q.at(-1) === "$") {
@@ -80,6 +82,7 @@ app.get("/api/data/number/:query", (req, res) => {
 
 	const prop = "number";
 	const { query } = req.params;
+	if (query.length > 100) return res.status(414).send("URI Too Long: 100 characters or less");
 
 	const uniqueResults = new Set<string>();
 
@@ -121,6 +124,7 @@ app.get("/api/data/primeForm/:query", (req, res) => {
 
 	const prop = "primeForm";
 	const { query } = req.params;
+	if (query.length > 25) return res.status(414).send("URI Too Long: 25 characters or less");
 
 	const filteredData: DataSet[] =
 		query.at(0) === "[" && query.at(-1) === "]"
@@ -142,6 +146,7 @@ app.get("/api/data/vec/:query", (req, res) => {
 
 	const prop = "vec";
 	const { query } = req.params;
+	if (query.length > 13) return res.status(414).send("URI Too Long: 13 characters or less");
 
 	const filteredData: DataSet[] =
 		query.at(0) === "<" && query.at(-1) === ">"
@@ -159,12 +164,13 @@ app.get("/api/data/vec/:query", (req, res) => {
 	res.status(200).send(filteredData);
 });
 
-// query = null || 4-z29A
+// query = null || 4-z29A || ^4 || A$
 app.get("/api/data/z/:query", (req, res) => {
 	if (!dataCache) return res.sendStatus(500);
 
 	const prop = "z";
 	const { query } = req.params;
+	if (query.length > 8) return res.status(414).send("URI Too Long: 8 characters or less");
 
 	const uniqueResults = new Set<string>();
 
