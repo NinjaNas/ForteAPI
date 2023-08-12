@@ -12,8 +12,6 @@ Forte API is a music theory API that provides a way to query set classes in 12 t
 
 **The API is rate-limited at 100 requests per day. Make an issue if you need more requests.**
 
-**Please make an issue for any bugs and typos you may find!****Currently this API is NOT live. The API is rate-limited at 100 requests per day. Make an issue if you need more requests.**
-
 **Please make an issue for any bugs and typos you may find!**
 
 </div>
