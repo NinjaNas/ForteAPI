@@ -1,21 +1,51 @@
 # ForteAPI
-Intro
+<p align="center">
+<img alt="GitHub last commit (branch)" src="https://img.shields.io/github/last-commit/NinjaNas/ForteAPI/main">
+<img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/NinjaNas/ForteAPI">
+<a href="https://github.com/NinjaNas/ForteAPI/issues"><img src="https://img.shields.io/github/issues/NinjaNas/ForteAPI" alt="issues - ForteAPI"></a>
+<a href="https://typescriptlang.org" title="Go to TypeScript homepage"><img src="https://img.shields.io/badge/TypeScript-5-blue?logo=typescript&logoColor=white" alt="Made with TypeScript"></a>
+<a href="https://github.com/NinjaNas/ForteAPI/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue" alt="License"></a>
+<p align="center">
+Forte API is a music theory API that provides a way to query set classes in 12 tone equal temperament. It uses data found on this <a href="https://en.wikipedia.org/wiki/List_of_set_classes">wikipedia page</a> to provide Forte numbers, prime forms, interval vectors, zygotic or twinned sets, and complements of sets.
+</p>
+</p>
+
 ## Table of Contents
 - [What are Forte Numbers? and More!](#what-are-forte-numbers-and-more)
 - [Should I use this API?](#should-i-use-this-api)
 - [Endpoints](#endpoints)
   - [GET /api/data](#get-apidata)
   - [GET /api/data/:prop/](#get-apidataprop)
+    - [number](#number)
+    - [primeForm](#primeform)
+    - [vec](#vec)
+    - [z](#z)
   - [GET /api/data/number/:query](#get-apidatanumberquery)
+    - [Exact Search](#exact-search)
+    - [Starts With Search](#starts-with-search)
+    - [Ends With Search](#ends-with-search)
+    - [Range Search](#range-search-inclusive)
+    - [Chaining Methods](#chaining-methods-no-duplicates)
   - [GET /api/data/primeForm/:query](#get-apidataprimeformquery)
+    - [Exact Search](#exact-search-1)
+    - [Fuzzy Search / Superset Search](#fuzzy-search--superset-search)
   - [GET /api/data/vec/:query](#get-apidatavecquery)
+    - [Exact Search](#exact-search-2)
+    - [Wildcard Search](#wildcard-search)
   - [GET /api/data/z/:query](#get-apidatazquery)
+    - [Exact Search](#exact-search-3)
+    - [Starts With Search](#starts-with-search-1)
+    - [Ends With Search](#ends-with-search-1)
 - [Using this API in your app](#using-this-api-in-your-app)
   - [Client-Side Validation](#client-side-validation)
 - [API Development](#api-development)
   - [Add .env File](#add-env-file)
+- [Star This Repo](#star-this-repo)
 ## What are Forte Numbers? and More!
 ## Should I use this API?
+You should only use this API either if you care about your intital load times as the full data size is ~27KB or if you want a prebuilt solution to query set classes.
+
+If you do not need to use this API, you should just download the json [here](https://github.com/NinjaNas/ForteAPI/blob/main/data/set_classes.json)
 ## Endpoints
 ### GET /api/data
 The endpoint returns all of the data from [/data/set-classes.json](https://github.com/NinjaNas/ForteAPI/blob/main/data/set_classes.json)
@@ -330,7 +360,7 @@ The endpoint returns an array of objects based on the query on the z property
 ## Using this API in your app
 ### Client-Side Validation
 This is a basic example of how you can implement client-side validation with a max length and regex for the query endpoint. 
-* Please note, that queries can be valid but not found thus giving a 400 status code. The main idea of using regex is to prevent the user from hitting the API when their input is invalid.
+* Please note, that queries can be formatted correctly but not found thus giving a 400 status code. The main idea of using regex is to prevent the user from hitting the API when their input is invalid.
 
 You can ignore the regex if you do not care if the user might hit the API more often due to invalid input. 
 ```ts
@@ -356,3 +386,5 @@ zRegex = /^(null|\^?[1-9]?[0-9]-z[1-9]?[0-9][AB]?\$?|\^[1-9]?[0-9]|\^[1-9]?[0-9]
 NODE_ENV=development
 PORT=[choose any port]
 ```
+## Star This Repo
+If you like this API please give it a star!
