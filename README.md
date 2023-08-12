@@ -1,14 +1,19 @@
 # ForteAPI
-<p align="center">
+<div align="center">
 <img alt="GitHub last commit (branch)" src="https://img.shields.io/github/last-commit/NinjaNas/ForteAPI/main">
 <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/NinjaNas/ForteAPI">
 <a href="https://github.com/NinjaNas/ForteAPI/issues"><img src="https://img.shields.io/github/issues/NinjaNas/ForteAPI" alt="issues - ForteAPI"></a>
 <a href="https://typescriptlang.org" title="Go to TypeScript homepage"><img src="https://img.shields.io/badge/TypeScript-5-blue?logo=typescript&logoColor=white" alt="Made with TypeScript"></a>
 <a href="https://github.com/NinjaNas/ForteAPI/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue" alt="License"></a>
-<p align="center">
-Forte API is a music theory API that provides a way to query set classes in 12 tone equal temperament. It uses data found on this <a href="https://en.wikipedia.org/wiki/List_of_set_classes">wikipedia page</a> to provide Forte numbers, prime forms, interval vectors, zygotic or twinned sets, and complements of sets.
-</p>
-</p>
+
+Forte API is a music theory API that provides a way to query set classes in 12 tone equal temperament. It uses data scraped from this <a href="https://en.wikipedia.org/wiki/List_of_set_classes">wikipedia page</a> to provide Forte numbers, prime forms, interval vectors, zygotic or twinned sets, and complements of sets.
+
+
+**Currently this API is NOT live. The API is rate-limited at 100 requests per day. Make an issue if you need more requests.**
+
+**Please make an issue for any bugs and typos you may find!**
+
+</div>
 
 ## Table of Contents
 - [What are Forte Numbers? and More!](#what-are-forte-numbers-and-more)
@@ -20,6 +25,7 @@ Forte API is a music theory API that provides a way to query set classes in 12 t
     - [primeForm](#primeform)
     - [vec](#vec)
     - [z](#z)
+    - [complement](#complement)
   - [GET /api/data/number/:query](#get-apidatanumberquery)
     - [Exact Search](#exact-search)
     - [Starts With Search](#starts-with-search)
@@ -36,16 +42,21 @@ Forte API is a music theory API that provides a way to query set classes in 12 t
     - [Exact Search](#exact-search-3)
     - [Starts With Search](#starts-with-search-1)
     - [Ends With Search](#ends-with-search-1)
+  - [GET /api/data/complement/:query](#get-apidatacomplementquery)
+    - [Exact Search](#exact-search-4)
+    - [Starts With Search](#starts-with-search-2)
+    - [Ends With Search](#ends-with-search-2)
 - [Using this API in your app](#using-this-api-in-your-app)
   - [Client-Side Validation](#client-side-validation)
 - [API Development](#api-development)
   - [Add .env File](#add-env-file)
 - [Star This Repo](#star-this-repo)
 ## What are Forte Numbers? and More!
+If you have the time watch this great playlist of videos by Jay Beard on [musical set theory](https://www.youtube.com/watch?v=3fe_NatE5w8&list=PLKWIRLQnfaw1KUMTG3b9mFrt0D3MFHvPF)!
 ## Should I use this API?
-You should only use this API either if you care about your intital load times as the full data size is ~27KB or if you want a prebuilt solution to query set classes.
+You should only use this API either if you care about your intital load times as the full data size is ~34KB or if you want a prebuilt solution to query set classes.
 
-If you do not need to use this API, you should just download the json [here](https://github.com/NinjaNas/ForteAPI/blob/main/data/set_classes.json)
+If you do not need to use this API, you should just download the json [here](https://github.com/NinjaNas/ForteAPI/blob/main/data/set_classes.json). Report any typos you may find or suggest new properties.
 ## Endpoints
 ### GET /api/data
 The endpoint returns all of the data from [/data/set-classes.json](https://github.com/NinjaNas/ForteAPI/blob/main/data/set_classes.json)
@@ -55,14 +66,16 @@ The endpoint returns all of the data from [/data/set-classes.json](https://githu
 		"number": "0-1",
 		"primeForm": "[]",
 		"vec": "<0,0,0,0,0,0>",
-		"z": null
+		"z": null,
+                "complement": "12-1"
 	},
          ...
 	{
 		"number": "12-1",
 		"primeForm": "[0,1,2,3,4,5,6,7,8,9,T,E]",
 		"vec": "<C,C,C,C,C,6>",
-		"z": null
+		"z": null,
+                "complement": "0-1"
 	}
 ]
 ```
@@ -108,6 +121,15 @@ The endpoint returns a flatmap of the valid properties (number, primeForm, vec, 
   null
 ]
 ```
+#### complement
+```ts
+// GET /api/data/complement
+[
+  "12-1",
+   ...
+  "0-1"
+]
+```
 ### GET /api/data/number/:query
 The endpoint returns an array of objects based on the query on the number property
 * Max URI length: No more than 100 characters
@@ -119,7 +141,8 @@ The endpoint returns an array of objects based on the query on the number proper
     "number": "1-1",
     "primeForm": "[0]",
     "vec": "<0,0,0,0,0,0>",
-    "z": null
+    "z": null,
+    "complement": "11-1"
   }
 ]
 ```
@@ -131,13 +154,15 @@ The endpoint returns an array of objects based on the query on the number proper
     "number": "4-z15A",
     "primeForm": "[0,1,4,6]",
     "vec": "<1,1,1,1,1,1>",
-    "z": "4-z29A"
+    "z": "4-z29A",
+    "complement": "8-z15B"
   },
   {
     "number": "4-z15B",
     "primeForm": "[0,2,5,6]",
     "vec": "<1,1,1,1,1,1>",
-    "z": "4-z29A"
+    "z": "4-z29A",
+    "complement": "8-z15A"
   }
 ]
 ```
@@ -149,7 +174,8 @@ The endpoint returns an array of objects based on the query on the number proper
     "number": "6-z50",
     "primeForm": "[0,1,4,6,7,9]",
     "vec": "<2,2,4,2,3,2>",
-    "z": "6-z29"
+    "z": "6-z29",
+    "complement": "6-z29"
   }
 ]
 ```
@@ -162,13 +188,15 @@ The endpoint returns an array of objects based on the query on the number proper
     "number": "1-1",
     "primeForm": "[0]",
     "vec": "<0,0,0,0,0,0>",
-    "z": null
+    "z": null,
+    "complement": "11-1"
   },
   {
     "number": "2-1",
     "primeForm": "[0,1]",
     "vec": "<1,0,0,0,0,0>",
-    "z": null
+    "z": null,
+    "complement": "10-1"
   }
 ]
 ```
@@ -181,31 +209,36 @@ The endpoint returns an array of objects based on the query on the number proper
     "number": "1-1",
     "primeForm": "[0]",
     "vec": "<0,0,0,0,0,0>",
-    "z": null
+    "z": null,
+    "complement": "11-1"
   },
   {
     "number": "4-z15A",
     "primeForm": "[0,1,4,6]",
     "vec": "<1,1,1,1,1,1>",
-    "z": "4-z29A"
+    "z": "4-z29A",
+    "complement": "8-z15B"
   },
   {
     "number": "4-z15B",
     "primeForm": "[0,2,5,6]",
     "vec": "<1,1,1,1,1,1>",
-    "z": "4-z29A"
+    "z": "4-z29A",
+    "complement": "8-z15A"
   },
   {
     "number": "6-z50",
     "primeForm": "[0,1,4,6,7,9]",
     "vec": "<2,2,4,2,3,2>",
-    "z": "6-z29"
+    "z": "6-z29",
+    "complement": "6-z29"
   },
   {
     "number": "2-1",
     "primeForm": "[0,1]",
     "vec": "<1,0,0,0,0,0>",
-    "z": null
+    "z": null,
+    "complement": "10-1"
   }
 ]
 ```
@@ -220,7 +253,8 @@ The endpoint returns an array of objects based on the query on the primeForm pro
     "number": "12-1",
     "primeForm": "[0,1,2,3,4,5,6,7,8,9,T,E]",
     "vec": "<C,C,C,C,C,6>",
-    "z": null
+    "z": null,
+    "complement": "0-1"
   }
 ]
 ```
@@ -233,13 +267,15 @@ The endpoint returns an array of objects based on the query on the primeForm pro
     "number": "11-1",
     "primeForm": "[0,1,2,3,4,5,6,7,8,9,T]",
     "vec": "<T,T,T,T,T,5>",
-    "z": null
+    "z": null,
+    "complement": "1-1"
   },
   {
     "number": "12-1",
     "primeForm": "[0,1,2,3,4,5,6,7,8,9,T,E]",
     "vec": "<C,C,C,C,C,6>",
-    "z": null
+    "z": null,
+    "complement": "0-1"
   }
 ]
 ```
@@ -254,25 +290,29 @@ The endpoint returns an array of objects based on the query on the vec property
     "number": "4-z15A",
     "primeForm": "[0,1,4,6]",
     "vec": "<1,1,1,1,1,1>",
-    "z": "4-z29A"
+    "z": "4-z29A",
+    "complement": "8-z15B"
   },
   {
     "number": "4-z15B",
     "primeForm": "[0,2,5,6]",
     "vec": "<1,1,1,1,1,1>",
-    "z": "4-z29A"
+    "z": "4-z29A",
+    "complement": "8-z15A"
   },
   {
     "number": "4-z29A",
     "primeForm": "[0,1,3,7]",
     "vec": "<1,1,1,1,1,1>",
-    "z": "4-z15A"
+    "z": "4-z15A",
+    "complement": "8-z29B"
   },
   {
     "number": "4-z29B",
     "primeForm": "[0,4,6,7]",
     "vec": "<1,1,1,1,1,1>",
-    "z": "4-z15A"
+    "z": "4-z15A",
+    "complement": "8-z29A"
   }
 ]
 ```
@@ -285,13 +325,15 @@ The endpoint returns an array of objects based on the query on the vec property
     "number": "4-12A",
     "primeForm": "[0,2,3,6]",
     "vec": "<1,1,2,1,0,1>",
-    "z": null
+    "z": null,
+    "complement": "8-12A"
   },
   {
     "number": "4-12B",
     "primeForm": "[0,3,4,6]",
     "vec": "<1,1,2,1,0,1>",
-    "z": null
+    "z": null,
+    "complement": "8-12B"
   }
 ]
 ```
@@ -307,13 +349,15 @@ The endpoint returns an array of objects based on the query on the z property
     "primeForm": "[]",
     "vec": "<0,0,0,0,0,0>",
     "z": null
+    "complement": "12-1"
   },
    ...
   {
     "number": "12-1",
     "primeForm": "[0,1,2,3,4,5,6,7,8,9,T,E]",
     "vec": "<C,C,C,C,C,6>",
-    "z": null
+    "z": null,
+    "complement": "0-1"
   }
 ]
 
@@ -323,7 +367,8 @@ The endpoint returns an array of objects based on the query on the z property
     "number": "5-z17",
     "primeForm": "[0,1,3,4,8]",
     "vec": "<2,1,2,3,2,0>",
-    "z": "5-z37"
+    "z": "5-z37",
+    "complement": "7-z17"
   }
 ]
 ```
@@ -335,13 +380,83 @@ The endpoint returns an array of objects based on the query on the z property
     "number": "4-z29A",
     "primeForm": "[0,1,3,7]",
     "vec": "<1,1,1,1,1,1>",
-    "z": "4-z15A"
+    "z": "4-z15A",
+    "complement": "8-z29B"
   },
   {
     "number": "4-z29B",
     "primeForm": "[0,4,6,7]",
     "vec": "<1,1,1,1,1,1>",
-    "z": "4-z15A"
+    "z": "4-z15A",
+    "complement": "8-z29A"
+  }
+]
+```
+#### Ends With Search
+```ts
+// GET /api/data/z/-z50$
+[
+  {
+    "number": "6-z29",
+    "primeForm": "[0,2,3,6,7,9]",
+    "vec": "<2,2,4,2,3,2>",
+    "z": "6-z50",
+    "complement": "6-z50"
+  }
+]
+```
+### GET /api/data/complement/:query
+The endpoint returns an array of objects based on the query on the complement property
+* Max URI length: No more than 8 characters
+#### Exact Search
+```ts
+// GET /api/data/complement/null
+[
+  {
+    "number": "6-1",
+    "primeForm": "[0,1,2,3,4,5]",
+    "vec": "<5,4,3,2,1,0>",
+    "z": null,
+    "complement": null
+  },
+   ...
+  {
+    "number": "6-35",
+    "primeForm": "[0,2,4,6,8,T]",
+    "vec": "<0,6,0,6,0,3>",
+    "z": null,
+    "complement": null
+  }
+]
+
+// GET /api/data/complement/5-z37
+[
+  {
+    "number": "7-z37",
+    "primeForm": "[0,1,3,4,5,7,8]",
+    "vec": "<4,3,4,5,4,1>",
+    "z": "7-z17",
+    "complement": "5-z37"
+  }
+]
+```
+#### Starts With Search
+```ts
+// GET /api/data/complement/^4-z15
+[
+  {
+    "number": "8-z15A",
+    "primeForm": "[0,1,2,3,4,6,8,9]",
+    "vec": "<5,5,5,5,5,3>",
+    "z": "8-z29A",
+    "complement": "4-z15B"
+  },
+  {
+    "number": "8-z15B",
+    "primeForm": "[0,1,3,5,6,7,8,9]",
+    "vec": "<5,5,5,5,5,3>",
+    "z": "8-z29A",
+    "complement": "4-z15A"
   }
 ]
 ```
@@ -353,7 +468,8 @@ The endpoint returns an array of objects based on the query on the z property
     "number": "6-z29",
     "primeForm": "[0,2,3,6,7,9]",
     "vec": "<2,2,4,2,3,2>",
-    "z": "6-z50"
+    "z": "6-z50",
+    "complement": "6-z50"
   }
 ]
 ```
@@ -379,6 +495,10 @@ vecRegex = /^<[0-9TEC],[0-9TEC],[0-9TEC],[0-9TEC],[0-9TEC],[0-9TEC]>|[0-9TECX]{6
 // Max Length Example: ^4-z15A$
 isNumberValidLength = input.length > 8
 zRegex = /^(null|\^?[1-9]?[0-9]-z[1-9]?[0-9][AB]?\$?|\^[1-9]?[0-9]|\^[1-9]?[0-9]-|\^[1-9]?[0-9]-z|\^[1-9]?[0-9]-z[1-9]?[0-9]|[AB]\$|[1-9]?[0-9][AB]?\$|z[1-9]?[0-9][AB]?\$|-z[1-9]?[0-9][AB]?\$)$/
+
+// Max Length Example: ^4-z15A$
+isNumberValidLength = input.length > 8
+complementRegex = ^(null|\^?[1-9]?[0-9]-z?[1-9]?[0-9][AB]?\$?|\^[1-9]?[0-9]|\^[1-9]?[0-9]-|\^[1-9]?[0-9]-z?|\^[1-9]?[0-9]-z?[1-9]?[0-9]|[AB]\$|[1-9]?[0-9][AB]?\$|z?[1-9]?[0-9][AB]?\$|-z?[1-9]?[0-9][AB]?\$)$
 ```
 ## API Development
 ### Add .env File
@@ -387,4 +507,4 @@ NODE_ENV=development
 PORT=[choose any port]
 ```
 ## Star This Repo
-If you like this API please give it a star!
+If you like this API please give it a star! *\~ Created by Khang Tran*
