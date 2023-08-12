@@ -84,6 +84,7 @@ Forte numbers are a system of labeling pitch-class sets in the musical set theor
 
 The labels are structured by cardinality-ordinal number. 
 * Ex. 3-6 meaning the 6th set in order of sets containing 3 pitch classes/notes.
+* In general the smaller the ordinal number the more compact the set is.
 
 If there is A or B appended to the end it means that set has a distinct inversion, where A is given to the most compact version. Both A and B share the same interval vector
 * Ex. 3-11A and 3-11B
