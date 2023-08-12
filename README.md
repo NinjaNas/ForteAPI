@@ -9,7 +9,7 @@
 Forte API is a music theory API that provides a way to query set classes in 12 tone equal temperament. It uses data scraped from this <a href="https://en.wikipedia.org/wiki/List_of_set_classes">wikipedia page</a> to provide Forte numbers, prime forms, interval vectors, zygotic or twinned sets, and complements of sets.
 
 
-**Currently this API is live [here](https://hcda8f8dtk.execute-api.us-east-1.amazonaws.com/prod/api/data/number) using AWS API Gateway + AWS Lambda!** 
+**Currently this API is live [here](https://hcda8f8dtk.execute-api.us-east-1.amazonaws.com/prod/api/data/) using AWS API Gateway + AWS Lambda!** 
 
 **The API is rate-limited at 100 requests per day. Make an issue if you need more requests.**
 
