@@ -1,11 +1,12 @@
 import dotenv from "dotenv";
 import express from "express";
+import serverless from "serverless-http";
 import rateLimit from "express-rate-limit";
 import cors from "cors";
 import fs from "fs/promises";
 
 const app = express();
-const port = process.env.PORT || 8080;
+// const port = process.env.PORT || 8080;
 app.use(cors());
 dotenv.config();
 
@@ -211,8 +212,8 @@ app.get("/api/data/complement/:query", (req, res) => {
 	res.status(200).send(filteredData);
 });
 
-app.listen(port, () => {
-	console.log(`server started at http://localhost:${port}`);
-});
+// app.listen(port, () => {
+// 	console.log(`server started at http://localhost:${port}`);
+// });
 
-export default app;
+module.exports.handler = serverless(app);
