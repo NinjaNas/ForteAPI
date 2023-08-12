@@ -524,7 +524,7 @@ The endpoint returns an array of objects based on the query on the complement pr
 ```
 #### Ends With Search
 ```ts
-// GET /api/data/number/-z50$
+// GET /api/data/complement/-z50$
 [
   {
     "number": "6-z29",
