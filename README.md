@@ -17,7 +17,13 @@ Forte API is a music theory API that provides a way to query set classes in 12 t
 
 ## Table of Contents
 - [What are Forte Numbers? and More!](#what-are-forte-numbers-and-more)
+  - [Set Theory](#set-theory)
+  - [Prime Form](#prime-form)
+  - [Interval Vector](#interval-vector)
+  - [Forte Numbers](#forte-numbers)
+  - [Complements](#complements)
 - [Should I use this API?](#should-i-use-this-api)
+- [DataSet Type](#dataset-type)
 - [Endpoints](#endpoints)
   - [GET /api/data](#get-apidata)
   - [GET /api/data/:prop/](#get-apidataprop)
@@ -53,10 +59,63 @@ Forte API is a music theory API that provides a way to query set classes in 12 t
 - [Star This Repo](#star-this-repo)
 ## What are Forte Numbers? and More!
 If you have the time watch this great playlist of videos by Jay Beard on [musical set theory](https://www.youtube.com/watch?v=3fe_NatE5w8&list=PLKWIRLQnfaw1KUMTG3b9mFrt0D3MFHvPF)!
+
+Before getting into Forte numbers we should learn basic set theory, prime form, and interval vectors.
+### Set Theory
+There are 12 notes or 12 pitch classes in 12 tone equal temperament.
+
+We can label them as so:
+
+Set Theory Labels: **0, 1, 2, 3, 4, 5, 6, 7, 8, 9, T, E (0 to 11)**
+
+Note Names: **C, C#/Db, D, D#/Eb, E, F, F#/Gb, G, G#/Ab, A, A#/Bb, B**
+
+### Prime Form
+Prime forms are a way to standardize sets so they can be compared. Prime form requires us to alway to have 0 first by transposition, unless it is the empty set, and have the smallest intervals as possible (compactness) going from left to right as there are different ways to order the same set
+* Ex: {0,1,2,4} - Note that {1,2,3,5} is not in prime form an is a transposition of {0,1,2,4} as we can subtract 1 from all of the elements to make {0,1,2,4}
+
+### Interval Vector
+An interval vector is a six-number sequence that represents the distribution of intervals within a pitch-class set. Each number in the vector indicates the number of times a specific interval (from 1 to 6 semitones) appears between any two pitches in the set. 
+* Ex: <6,4,5,6,5,2>
+* Ex: <C,C,C,C,C,6> (C stands for 12 here)
+
+### Forte Numbers
+Forte numbers are a system of labeling pitch-class sets in the musical set theory, named after the musicologist Allen Forte who devised this classification system. They offer a systematic way to catalog and study the various pitch-class sets in twelve-tone music.
+
+The labels are structured by cardinality-ordinal number. 
+* Ex. 3-6 meaning the 6th set in order of sets containing 3 pitch classes/notes.
+
+If there is A or B appended to the end it means that set has a distinct inversion, where A is given to the most compact version. Both A and B share the same interval vector
+* Ex. 3-11A and 3-11B
+* 3-11A has a prime form of {0,3,7} and 3-11B has a prime form of {0,3,7}
+* Let's invert {0,3,7} in this system we are using mod 12 because we have 12 pitch classes
+* {12-0 mod 12, 12-3 mod 12, 12-7 mod 12} = {0, 9, 5}
+* Order for compactness: {5, 9, 0} has the smallest intervals going from left to right
+* Transpose so first element is 0: {5-5, 9-5, 12(0)-5) = {0,4,7}
+
+If there is a Z in the Forte number this means it is a zygotic/twinned set that has a twin set with the same interval vector and is not an inversion of the set. In this API, the Z property is linked only A when applicable for consistency.
+* Ex: 4-z15A and 4-z29A
+* Ex: 6-z4 and 6-z37
+
+### Complements
+Complements are pairs of sets that add up to set with all pitch classes {0,1,2,3,4,5,6,7,8,9,T,E}. If a set does not have a complement that means they are a complement of themselves
+* Ex: Prime form of {} is a complement of {0,1,2,3,4,5,6,7,8,9,T,E}
+* Ex: {0,1,3,4} is a complement of {0,1,2,3,4,5,6,9} after some transposition
+
 ## Should I use this API?
 You should only use this API either if you care about your intital load times as the full data size is ~34KB or if you want a prebuilt solution to query set classes.
 
 If you do not need to use this API, you should just download the json [here](https://github.com/NinjaNas/ForteAPI/blob/main/data/set_classes.json). Report any typos you may find or suggest new properties.
+## DataSet Type
+```ts
+type DataSet = {
+	number: string;
+	primeForm: string;
+	vec: string;
+	z: null | string;
+	complement: null | string;
+};
+```
 ## Endpoints
 ### GET /api/data
 The endpoint returns all of the data from [/data/set-classes.json](https://github.com/NinjaNas/ForteAPI/blob/main/data/set_classes.json)
