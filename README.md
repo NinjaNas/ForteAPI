@@ -1,8 +1,8 @@
 # ForteAPI
 <div align="center">
 <img alt="GitHub last commit (branch)" src="https://img.shields.io/github/last-commit/NinjaNas/ForteAPI/main">
-<img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/NinjaNas/ForteAPI">
 <a href="https://github.com/NinjaNas/ForteAPI/issues"><img src="https://img.shields.io/github/issues/NinjaNas/ForteAPI" alt="issues - ForteAPI"></a>
+<img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/NinjaNas/ForteAPI">
 <a href="https://typescriptlang.org" title="Go to TypeScript homepage"><img src="https://img.shields.io/badge/TypeScript-5-blue?logo=typescript&logoColor=white" alt="Made with TypeScript"></a>
 <a href="https://github.com/NinjaNas/ForteAPI/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue" alt="License"></a>
 
