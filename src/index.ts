@@ -27,9 +27,10 @@ type DataSet = {
 	primeForm: string;
 	vec: string;
 	z: null | string;
+	complement: null | string;
 };
 
-type props = "number" | "primeForm" | "vec" | "z";
+type props = "number" | "primeForm" | "vec" | "z" | "complement";
 
 let dataCache: DataSet[];
 
@@ -38,7 +39,7 @@ const flatData: { [key: string]: (null | string)[] } = {};
 fs.readFile("./data/set_classes.json", "utf8")
 	.then(data => {
 		dataCache = JSON.parse(data);
-		flatData["prop"] = ["number", "primeForm", "vec", "z"];
+		flatData["prop"] = ["number", "primeForm", "vec", "z", "complement"];
 		flatData.prop.forEach(prop => {
 			flatData[prop as props] = dataCache.map(e => e[prop as props]);
 		});
@@ -169,6 +170,29 @@ app.get("/api/data/z/:query", (req, res) => {
 	if (!dataCache) return res.sendStatus(500);
 
 	const prop = "z";
+	const { query } = req.params;
+	if (query.length > 8) return res.status(414).send("URI Too Long: 8 characters or less");
+
+	const uniqueResults = new Set<string>();
+
+	for (const q of query.split(",")) {
+		// filter based on queries, then add to set as a string
+		dataCache.filter(filterFunc(q, prop)).forEach(item => uniqueResults.add(JSON.stringify(item)));
+	}
+
+	// spread set into an array then convert back to JSON
+	const filteredData: DataSet[] = [...uniqueResults].map(itemStr => JSON.parse(itemStr));
+	if (!filteredData.length)
+		return res.status(400).send("Bad Request: Incorrect Query or Query Not Found");
+
+	res.status(200).send(filteredData);
+});
+
+// query = null || 4-z29A || ^4 || A$
+app.get("/api/data/complement/:query", (req, res) => {
+	if (!dataCache) return res.sendStatus(500);
+
+	const prop = "complement";
 	const { query } = req.params;
 	if (query.length > 8) return res.status(414).send("URI Too Long: 8 characters or less");
 
