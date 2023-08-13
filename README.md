@@ -572,4 +572,4 @@ NODE_ENV=development
 PORT=[choose any port]
 ```
 ## Star This Repo
-If you like this API please give it a star! *\~ Created by Khang Tran*
+If you like this API, please give it a star! *\~ Created by Khang Tran*
