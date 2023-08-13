@@ -310,6 +310,8 @@ The endpoint returns an array of objects based on the query on the primeForm pro
 #### Exact Search
 ```ts
 // GET /api/data/primeForm/[0,1,2,3,4,5,6,7,8,9,T,E]
+// WARNING: AWS will not process "[" and "]" you will need to use percent encoding with %5B and %5D respectively
+// GET /api/data/primeForm/%5B0,1,2,3,4,5,6,7,8,9,T,E%5D
 [
   {
     "number": "12-1",
