@@ -106,7 +106,7 @@ Complements are pairs of sets that add up to set with all pitch classes {0,1,2,3
 * Ex: {0,1,3,4} is a complement of {0,1,2,3,4,5,6,9} after some transposition
 
 ## Should I use this API?
-You should only use this API either if you care about your intital load times as the full data size is ~34KB or if you want a prebuilt solution to query set classes.
+You should only use this API either if you care about your intital load times as the full data size is ~42KB or if you want a prebuilt solution to query set classes.
 
 If you do not need to use this API, you should just download the json [here](https://github.com/NinjaNas/ForteAPI/blob/main/data/set_classes.json). Report any typos you may find or suggest new properties.
 ## DataSet Type
