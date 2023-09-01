@@ -71,6 +71,30 @@ app.get("/api/data", (req, res) => {
 app.get("/api/data/:prop/", (req, res) => {
 	if (!dataCache) return res.sendStatus(500);
 
+	const tempDataCache = structuredClone(dataCache);
+
+	const { prop } = req.params;
+
+	const propSplit = prop.split(",");
+
+	for (const p of propSplit) {
+		if (!flatData.prop.includes(p)) return res.status(400).send("Bad Request: Incorrect Property");
+	}
+
+	const propsToRemove = flatData.prop.filter(p => !propSplit.includes(p));
+
+	for (const d of tempDataCache) {
+		for (const p of propsToRemove) {
+			delete d[p as props];
+		}
+	}
+
+	res.status(200).send(tempDataCache);
+});
+
+app.get("/api/flatdata/:prop/", (req, res) => {
+	if (!dataCache) return res.sendStatus(500);
+
 	const { prop } = req.params;
 	if (!flatData.prop.includes(prop)) return res.status(400).send("Bad Request: Incorrect Property");
 
