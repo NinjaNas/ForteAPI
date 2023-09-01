@@ -75,6 +75,7 @@ app.get("/api/data/:prop/", (req, res) => {
 	const tempDataCache = structuredClone(dataCache);
 
 	const { prop } = req.params;
+	if (prop.length > 33) return res.status(414).send("URI Too Long: 33 characters or less");
 
 	const propSplit = prop.split(",");
 
