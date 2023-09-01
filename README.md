@@ -131,7 +131,7 @@ You should only use this API either if you care about your intital load times as
 If you do not need to use this API, you should just download the json [here](https://github.com/NinjaNas/ForteAPI/blob/main/data/set_classes.json). Report any typos you may find or suggest new properties.
 
 ## DataSet Type
-
+**Note: Properties are case-sensitive!**
 ```ts
 type DataSet = {
 	number: string;
@@ -170,6 +170,8 @@ The endpoint returns all of the data from [/data/set-classes.json](https://githu
 ### GET /api/data/:prop/
 
 The endpoint returns the full data given the properties provided in a comma separated list (number, primeForm, vec, z, complement)
+
+- Max URI length: No more than 33 characters
 
 ```ts
 // GET /api/data/number
