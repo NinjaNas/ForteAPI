@@ -2574,6 +2574,28 @@ describe("API Endpoints", () => {
 					done();
 				});
 		});
+
+		it("should return 414 over 33", done => {
+			chai
+				.request(server)
+				.get("/api/data/number,primeForm,z,vec,complements")
+				.end((err, res) => {
+					should.not.exist(err);
+					res.should.have.status(414);
+					done();
+				});
+		});
+
+		it("should return 400 if incorrect prop", done => {
+			chai
+				.request(server)
+				.get("/api/data/primeform")
+				.end((err, res) => {
+					should.not.exist(err);
+					res.should.have.status(400);
+					done();
+				});
+		});
 	});
 
 	describe("GET /api/flatdata/:prop", () => {
