@@ -155,9 +155,10 @@ app.get("/api/data/primeForm/:query", (req, res) => {
 
 	const filteredData: DataSet[] =
 		query.at(0) === "[" && query.at(-1) === "]"
-			? dataCache.filter(e => e[prop] === query)
+			? dataCache.filter(e => e[prop] === JSON.stringify(query.slice(1, -1).split(",")))
 			: dataCache.filter(
-					e => !query.includes(",") && query.split("").every(val => e[prop].includes(val))
+					e =>
+						!query.includes(",") && query.split("").every(val => JSON.parse(e[prop]).includes(val))
 			  );
 
 	// spread set into an array then convert back to JSON

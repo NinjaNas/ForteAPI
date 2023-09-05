@@ -12,7 +12,7 @@ Forte API is a music theory API that provides a way to query set classes in 12 t
 ##
 
 **Currently this API is live [here](https://hcda8f8dtk.execute-api.us-east-1.amazonaws.com/prod/api/data/) using AWS API Gateway + AWS Lambda!**
-**Check out the OpenAPI docs on SwaggerHub [here](https://app.swaggerhub.com/apis-docs/NinjaNas/ForteAPI/1.1.0)!**
+**Check out the OpenAPI docs on SwaggerHub [here](https://app.swaggerhub.com/apis-docs/NinjaNas/ForteAPI/1.2.0)!**
 
 **The API is rate-limited at 500 requests per day. Make an issue if you need more requests.**
 
@@ -131,11 +131,13 @@ You should only use this API either if you care about your intital load times as
 If you do not need to use this API, you should just download the json [here](https://github.com/NinjaNas/ForteAPI/blob/main/data/set_classes.json). Report any typos you may find or suggest new properties.
 
 ## DataSet Type
+
 **Note: Properties are case-sensitive!**
+
 ```ts
 type DataSet = {
 	number: string;
-	primeForm: string;
+	primeForm: string; // can be easily formatted to a string[] by JSON.parse(primeFormString)
 	vec: string;
 	z: null | string;
 	complement: null | string;
@@ -152,14 +154,14 @@ The endpoint returns all of the data from [/data/set-classes.json](https://githu
 [
 	{
 		number: "0-1",
-		primeForm: "[]",
+		primeForm: '[""]',
 		vec: "<0,0,0,0,0,0>",
 		z: null,
 		complement: "12-1"
 	},
 	...{
 		number: "12-1",
-		primeForm: "[0,1,2,3,4,5,6,7,8,9,T,E]",
+		primeForm: '["0","1","2","3","4","5","6","7","8","9","T","E"]',
 		vec: "<C,C,C,C,C,6>",
 		z: null,
 		complement: "0-1"
@@ -189,12 +191,12 @@ The endpoint returns the full data given the properties provided in a comma sepa
 [
   {
     "number": "0-1"
-    "primeForm": "[]"
+    "primeForm": '[""]'
   },
     ...
   {
     "number": "12-1"
-    "primeForm": "[0,1,2,3,4,5,6,7,8,9,T,E]"
+    "primeForm": '["0","1","2","3","4","5","6","7","8","9","T","E"]'
   },
 ]
 ```
@@ -207,35 +209,35 @@ The endpoint returns a flatmap of the valid properties (number, primeForm, vec, 
 
 ```ts
 // GET /api/flatdata/number
-["0-1", ..."4-z15A", ..."12-1"];
+["0-1", ..., "4-z15A", ..., "12-1"];
 ```
 
 #### primeForm
 
 ```ts
 // GET /api/flatdata/primeForm
-["[]", ..."[0,1,2,3,4,5,6,7,8,9,T,E]"];
+['[""]'', ..., '["0","1","2","3","4","5","6","7","8","9","T","E"]'];
 ```
 
 #### vec
 
 ```ts
 // GET /api/flatdata/vec
-["<0,0,0,0,0,0>", ..."<C,C,C,C,C,6>"];
+["<0,0,0,0,0,0>", ..., "<C,C,C,C,C,6>"];
 ```
 
 #### z
 
 ```ts
 // GET /api/flatdata/z
-[null, ..."4-z15A", ...null];
+[null, ..., "4-z15A", ..., null];
 ```
 
 #### complement
 
 ```ts
 // GET /api/flatdata/complement
-["12-1", ..."0-1"];
+["12-1", ..., "0-1"];
 ```
 
 ### GET /api/data/number/:query
@@ -251,7 +253,7 @@ The endpoint returns an array of objects based on the query on the number proper
 [
 	{
 		number: "1-1",
-		primeForm: "[0]",
+		primeForm: '["0"]',
 		vec: "<0,0,0,0,0,0>",
 		z: null,
 		complement: "11-1"
@@ -266,14 +268,14 @@ The endpoint returns an array of objects based on the query on the number proper
 [
 	{
 		number: "4-z15A",
-		primeForm: "[0,1,4,6]",
+		primeForm: '["0","1","4","6"]',
 		vec: "<1,1,1,1,1,1>",
 		z: "4-z29A",
 		complement: "8-z15B"
 	},
 	{
 		number: "4-z15B",
-		primeForm: "[0,2,5,6]",
+		primeForm: '["0","2","5","6"]',
 		vec: "<1,1,1,1,1,1>",
 		z: "4-z29A",
 		complement: "8-z15A"
@@ -288,7 +290,7 @@ The endpoint returns an array of objects based on the query on the number proper
 [
 	{
 		number: "6-z50",
-		primeForm: "[0,1,4,6,7,9]",
+		primeForm: '["0","1","4","6","7","9"]',
 		vec: "<2,2,4,2,3,2>",
 		z: "6-z29",
 		complement: "6-z29"
@@ -304,14 +306,14 @@ The endpoint returns an array of objects based on the query on the number proper
 [
 	{
 		number: "1-1",
-		primeForm: "[0]",
+		primeForm: '["0"]',
 		vec: "<0,0,0,0,0,0>",
 		z: null,
 		complement: "11-1"
 	},
 	{
 		number: "2-1",
-		primeForm: "[0,1]",
+		primeForm: '["0","1"]',
 		vec: "<1,0,0,0,0,0>",
 		z: null,
 		complement: "10-1"
@@ -327,35 +329,35 @@ The endpoint returns an array of objects based on the query on the number proper
 [
 	{
 		number: "1-1",
-		primeForm: "[0]",
+		primeForm: '["0"]',
 		vec: "<0,0,0,0,0,0>",
 		z: null,
 		complement: "11-1"
 	},
 	{
 		number: "4-z15A",
-		primeForm: "[0,1,4,6]",
+		primeForm: '["0","1","4","6"]',
 		vec: "<1,1,1,1,1,1>",
 		z: "4-z29A",
 		complement: "8-z15B"
 	},
 	{
 		number: "4-z15B",
-		primeForm: "[0,2,5,6]",
+		primeForm: '["0","2","5","6"]',
 		vec: "<1,1,1,1,1,1>",
 		z: "4-z29A",
 		complement: "8-z15A"
 	},
 	{
 		number: "6-z50",
-		primeForm: "[0,1,4,6,7,9]",
+		primeForm: '["0","1","4","6","7","9"]',
 		vec: "<2,2,4,2,3,2>",
 		z: "6-z29",
 		complement: "6-z29"
 	},
 	{
 		number: "2-1",
-		primeForm: "[0,1]",
+		primeForm: '["0","1"]',
 		vec: "<1,0,0,0,0,0>",
 		z: null,
 		complement: "10-1"
@@ -378,7 +380,7 @@ The endpoint returns an array of objects based on the query on the primeForm pro
 [
 	{
 		number: "12-1",
-		primeForm: "[0,1,2,3,4,5,6,7,8,9,T,E]",
+		primeForm: '["0","1","2","3","4","5","6","7","8","9","T","E"]',
 		vec: "<C,C,C,C,C,6>",
 		z: null,
 		complement: "0-1"
@@ -394,14 +396,14 @@ The endpoint returns an array of objects based on the query on the primeForm pro
 [
 	{
 		number: "11-1",
-		primeForm: "[0,1,2,3,4,5,6,7,8,9,T]",
+		primeForm: '["0","1","2","3","4","5","6","7","8","9","T"]',
 		vec: "<T,T,T,T,T,5>",
 		z: null,
 		complement: "1-1"
 	},
 	{
 		number: "12-1",
-		primeForm: "[0,1,2,3,4,5,6,7,8,9,T,E]",
+		primeForm: '["0","1","2","3","4","5","6","7","8","9","T","E"]',
 		vec: "<C,C,C,C,C,6>",
 		z: null,
 		complement: "0-1"
@@ -422,28 +424,28 @@ The endpoint returns an array of objects based on the query on the vec property
 [
 	{
 		number: "4-z15A",
-		primeForm: "[0,1,4,6]",
+		primeForm: '["0","1","4","6"]',
 		vec: "<1,1,1,1,1,1>",
 		z: "4-z29A",
 		complement: "8-z15B"
 	},
 	{
 		number: "4-z15B",
-		primeForm: "[0,2,5,6]",
+		primeForm: '["0","2","5","6"]',
 		vec: "<1,1,1,1,1,1>",
 		z: "4-z29A",
 		complement: "8-z15A"
 	},
 	{
 		number: "4-z29A",
-		primeForm: "[0,1,3,7]",
+		primeForm: '["0","1","3","7"]',
 		vec: "<1,1,1,1,1,1>",
 		z: "4-z15A",
 		complement: "8-z29B"
 	},
 	{
 		number: "4-z29B",
-		primeForm: "[0,4,6,7]",
+		primeForm: '["0","4","6","7"]',
 		vec: "<1,1,1,1,1,1>",
 		z: "4-z15A",
 		complement: "8-z29A"
@@ -459,14 +461,14 @@ The endpoint returns an array of objects based on the query on the vec property
 [
 	{
 		number: "4-12A",
-		primeForm: "[0,2,3,6]",
+		primeForm: '["0","2","3","6"]'',
 		vec: "<1,1,2,1,0,1>",
 		z: null,
 		complement: "8-12A"
 	},
 	{
 		number: "4-12B",
-		primeForm: "[0,3,4,6]",
+		primeForm: '["0","3","4","6"]',
 		vec: "<1,1,2,1,0,1>",
 		z: null,
 		complement: "8-12B"
@@ -487,7 +489,7 @@ The endpoint returns an array of objects based on the query on the z property
 [
   {
     "number": "0-1",
-    "primeForm": "[]",
+    "primeForm": '[""]',
     "vec": "<0,0,0,0,0,0>",
     "z": null
     "complement": "12-1"
@@ -495,7 +497,7 @@ The endpoint returns an array of objects based on the query on the z property
    ...
   {
     "number": "12-1",
-    "primeForm": "[0,1,2,3,4,5,6,7,8,9,T,E]",
+    "primeForm": '["0","1","2","3","4","5","6","7","8","9","T","E"]',
     "vec": "<C,C,C,C,C,6>",
     "z": null,
     "complement": "0-1"
@@ -506,7 +508,7 @@ The endpoint returns an array of objects based on the query on the z property
 [
   {
     "number": "5-z17",
-    "primeForm": "[0,1,3,4,8]",
+    "primeForm": '["0","1","3","4","8"]',
     "vec": "<2,1,2,3,2,0>",
     "z": "5-z37",
     "complement": "7-z17"
@@ -521,14 +523,14 @@ The endpoint returns an array of objects based on the query on the z property
 [
 	{
 		number: "4-z29A",
-		primeForm: "[0,1,3,7]",
+		primeForm: '["0","1","3","7"]',
 		vec: "<1,1,1,1,1,1>",
 		z: "4-z15A",
 		complement: "8-z29B"
 	},
 	{
 		number: "4-z29B",
-		primeForm: "[0,4,6,7]",
+		primeForm: '["0","4","6","7"]',
 		vec: "<1,1,1,1,1,1>",
 		z: "4-z15A",
 		complement: "8-z29A"
@@ -543,7 +545,7 @@ The endpoint returns an array of objects based on the query on the z property
 [
 	{
 		number: "6-z29",
-		primeForm: "[0,2,3,6,7,9]",
+		primeForm: '["0","2","3","6","7","9"]',
 		vec: "<2,2,4,2,3,2>",
 		z: "6-z50",
 		complement: "6-z50"
@@ -564,14 +566,14 @@ The endpoint returns an array of objects based on the query on the complement pr
 [
 	{
 		number: "6-1",
-		primeForm: "[0,1,2,3,4,5]",
+		primeForm: '["0","1","2","3","4","5"]',
 		vec: "<5,4,3,2,1,0>",
 		z: null,
 		complement: null
 	},
 	...{
 		number: "6-35",
-		primeForm: "[0,2,4,6,8,T]",
+		primeForm: '["0","2","4","6","8","T"]',
 		vec: "<0,6,0,6,0,3>",
 		z: null,
 		complement: null
@@ -580,7 +582,7 @@ The endpoint returns an array of objects based on the query on the complement pr
 	// GET /api/data/complement/5-z37
 	{
 		number: "7-z37",
-		primeForm: "[0,1,3,4,5,7,8]",
+		primeForm: '["0","1","3","4","5","7","8"]',
 		vec: "<4,3,4,5,4,1>",
 		z: "7-z17",
 		complement: "5-z37"
@@ -595,14 +597,14 @@ The endpoint returns an array of objects based on the query on the complement pr
 [
 	{
 		number: "8-z15A",
-		primeForm: "[0,1,2,3,4,6,8,9]",
+		primeForm: '["0","1","2","3","4","6","8","9"]',
 		vec: "<5,5,5,5,5,3>",
 		z: "8-z29A",
 		complement: "4-z15B"
 	},
 	{
 		number: "8-z15B",
-		primeForm: "[0,1,3,5,6,7,8,9]",
+		primeForm: '["0","1","3","5","6","7","8","9"]',
 		vec: "<5,5,5,5,5,3>",
 		z: "8-z29A",
 		complement: "4-z15A"
@@ -617,7 +619,7 @@ The endpoint returns an array of objects based on the query on the complement pr
 [
 	{
 		number: "6-z29",
-		primeForm: "[0,2,3,6,7,9]",
+		primeForm: '["0","2","3","6","7","9"]',
 		vec: "<2,2,4,2,3,2>",
 		z: "6-z50",
 		complement: "6-z50"
@@ -627,7 +629,7 @@ The endpoint returns an array of objects based on the query on the complement pr
 
 ## Using this API in your app
 
-### Client-Side Validation
+### Simple Client-Side Validation
 
 This is a basic example of how you can implement client-side validation with a max length and regex for the query endpoint.
 
@@ -636,6 +638,10 @@ This is a basic example of how you can implement client-side validation with a m
 You can ignore the regex if you do not care if the user might hit the API more often due to invalid input.
 
 ```ts
+// Max Length Example: number,primeForm,vec,z,complement
+isDataValidLength = input.length > 33;
+dataRegex = /^((number|primeForm|vec|z|complement)(,(number|primeForm|vec|z|complement))*)$/;
+
 // Max Length Example: 0-1,1-1,2-1,2-2,2-3,2-4,2-5,2-6,3-2A,3-2B,3-3A,3-3B,3-4A,3-4B,3-5A,3-5B,3-6,3-7A,3-7B,3-8A,3-8B,4-2A
 isNumberValidLength = input.length > 100;
 numberRegex =
@@ -647,16 +653,16 @@ primeFormRegex =
 	/^(\[(0)?(,1)?(,2)?(,3)?(,4)?(,5)?(,6)?(,7)?(,8)?(,9)?(,T)?(,E)?]|(?!._(.)._\14)[0-9TE]{1,12})$/;
 
 // Max Length Example: <1,1,1,1,1,1>
-isNumberValidLength = input.length > 13;
+isVecValidLength = input.length > 13;
 vecRegex = /^<[0-9TEC],[0-9TEC],[0-9TEC],[0-9TEC],[0-9TEC],[0-9TEC]>|[0-9TECX]{6,6}$/;
 
 // Max Length Example: ^4-z15A$
-isNumberValidLength = input.length > 8;
+isZValidLength = input.length > 8;
 zRegex =
 	/^(null|\^?[1-9]?[0-9]-z[1-9]?[0-9][AB]?\$?|\^[1-9]?[0-9]|\^[1-9]?[0-9]-|\^[1-9]?[0-9]-z|\^[1-9]?[0-9]-z[1-9]?[0-9]|[AB]\$|[1-9]?[0-9][AB]?\$|z[1-9]?[0-9][AB]?\$|-z[1-9]?[0-9][AB]?\$)$/;
 
 // Max Length Example: ^4-z15A$
-isNumberValidLength = input.length > 8;
+isComplementValidLength = input.length > 8;
 complementRegex =
 	/^(null|\^?[1-9]?[0-9]-z?[1-9]?[0-9][AB]?\$?|\^[1-9]?[0-9]|\^[1-9]?[0-9]-|\^[1-9]?[0-9]-z?|\^[1-9]?[0-9]-z?[1-9]?[0-9]|[AB]\$|[1-9]?[0-9][AB]?\$|z?[1-9]?[0-9][AB]?\$|-z?[1-9]?[0-9][AB]?\$)$/;
 ```
