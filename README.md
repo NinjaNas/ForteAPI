@@ -159,7 +159,8 @@ The endpoint returns all of the data from [/data/set-classes.json](https://githu
 		z: null,
 		complement: "12-1"
 	},
-	...{
+	  ...
+	{
 		number: "12-1",
 		primeForm: '["0","1","2","3","4","5","6","7","8","9","T","E"]',
 		vec: "<C,C,C,C,C,6>",
