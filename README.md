@@ -186,7 +186,7 @@ The endpoint returns the full data given the properties provided in a comma sepa
   {
     "number": "12-1"
   },
-]
+];
 
 // GET /api/data/number,primeForm
 [
@@ -199,7 +199,7 @@ The endpoint returns the full data given the properties provided in a comma sepa
     "number": "12-1"
     "primeForm": '["0","1","2","3","4","5","6","7","8","9","T","E"]'
   },
-]
+];
 ```
 
 ### GET /api/flatdata/:prop/
@@ -503,7 +503,7 @@ The endpoint returns an array of objects based on the query on the z property
     "z": null,
     "complement": "0-1"
   }
-]
+];
 
 // GET /api/data/z/5-z37
 [
@@ -514,7 +514,7 @@ The endpoint returns an array of objects based on the query on the z property
     "z": "5-z37",
     "complement": "7-z17"
   }
-]
+];
 ```
 
 #### Starts With Search
@@ -572,15 +572,18 @@ The endpoint returns an array of objects based on the query on the complement pr
 		z: null,
 		complement: null
 	},
-	...{
+	  ...
+	{
 		number: "6-35",
 		primeForm: '["0","2","4","6","8","T"]',
 		vec: "<0,6,0,6,0,3>",
 		z: null,
 		complement: null
 	}
-][
-	// GET /api/data/complement/5-z37
+];
+
+// GET /api/data/complement/5-z37
+[
 	{
 		number: "7-z37",
 		primeForm: '["0","1","3","4","5","7","8"]',
