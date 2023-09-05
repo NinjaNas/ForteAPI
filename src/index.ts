@@ -10,11 +10,11 @@ const app = express();
 app.use(cors());
 dotenv.config();
 
-const RATE_LIMIT: number = 100;
+const RATE_LIMIT: number = 500;
 
 const limiter = rateLimit({
 	windowMs: 24 * 60 * 60 * 1000, // 1 day
-	max: RATE_LIMIT, // Limit each IP to 100 requests per `window`
+	max: RATE_LIMIT, // Limit each IP to 500 requests per `window`
 	standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
 	legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 	message: `Too many requests, please try again later. Current rate limit: ${RATE_LIMIT} requests per day`
