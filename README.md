@@ -690,6 +690,27 @@ The json files here can be recreated using the set_class.json file.
 ##### Links
 ```ts
 // prime
+const flatRes = await fetch('.../api/flatdata/primeForm/')
+const data: string[] = await flatRes.json()
+linkBuilder(data, true) // change 2nd arg to false for cardinal
+
+const linkBuilder = (data: string[], condition: strict = true) => {
+  const newData: string[][] = data.map((s) => s.slice(1, -1).split(','))
+  let links: Link[] = [{ source: '[""]', target: '["0"]' }]
+
+  for (const s of newData) {
+    for (const t of newData) {
+      if (
+        s.every((e) => t.includes(e)) &&
+        s.length === t.length - 1 &&
+        (strict ? t > s : true)
+      ) {
+        links.push({ source: '[' + s.toString() + ']', target: '[' + t.toString() + ']' })
+      }
+    }
+  }
+  return links
+}
 
 // primeforte
 const res = await fetch('.../api/data/number,primeForm/')
