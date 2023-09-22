@@ -685,7 +685,7 @@ While comparing [\"0\",\"1\",\"3\",\"4\"] > [\"0\",\"2\",\"3\"], it returns fals
 ```
 #### Manual Construction
 
-The json files here can be recreated using the set_class.json file.
+The json files here can be recreated using the set_classes.json file.
 
 ##### Links
 ```ts
