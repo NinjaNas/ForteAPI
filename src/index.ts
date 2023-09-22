@@ -33,9 +33,18 @@ type DataSet = {
 
 type props = "number" | "primeForm" | "vec" | "z" | "complement";
 
+type links = { source: string; target: string }[];
+type dag = {
+	size: { width: number; height: number };
+	nodes: { x: number; y: number; data: string }[];
+	links: { source: string; target: string; points: number[][]; data: links };
+	v: number;
+};
+
 let dataCache: DataSet[];
 
 const flatData: { [key: string]: (null | string)[] } = {};
+const dagData: { [key: string]: links | dag } = {};
 
 fs.readFile("./data/set_classes.json", "utf8")
 	.then(data => {
@@ -44,6 +53,70 @@ fs.readFile("./data/set_classes.json", "utf8")
 		flatData.prop.forEach(prop => {
 			flatData[prop as props] = dataCache.map(e => e[prop as props]);
 		});
+	})
+	.catch(err => {
+		console.error("Error reading the data file:", err);
+	});
+
+fs.readFile("./data/d3/cardinality-increasing/dags/prime.json", "utf8")
+	.then(data => {
+		dagData["cardinaldagprime"] = JSON.parse(data);
+	})
+	.catch(err => {
+		console.error("Error reading the data file:", err);
+	});
+
+fs.readFile("./data/d3/cardinality-increasing/dags/primeforte.json", "utf8")
+	.then(data => {
+		dagData["cardinaldagprimeforte"] = JSON.parse(data);
+	})
+	.catch(err => {
+		console.error("Error reading the data file:", err);
+	});
+
+fs.readFile("./data/d3/cardinality-increasing/links/prime.json", "utf8")
+	.then(data => {
+		dagData["cardinallinkprime"] = JSON.parse(data);
+	})
+	.catch(err => {
+		console.error("Error reading the data file:", err);
+	});
+
+fs.readFile("./data/d3/cardinality-increasing/links/primeforte.json", "utf8")
+	.then(data => {
+		dagData["cardinallinkprimeforte"] = JSON.parse(data);
+	})
+	.catch(err => {
+		console.error("Error reading the data file:", err);
+	});
+
+fs.readFile("./data/d3/strictly-increasing/dags/prime.json", "utf8")
+	.then(data => {
+		dagData["strictdagprime"] = JSON.parse(data);
+	})
+	.catch(err => {
+		console.error("Error reading the data file:", err);
+	});
+
+fs.readFile("./data/d3/strictly-increasing/dags/primeforte.json", "utf8")
+	.then(data => {
+		dagData["strictdagprimeforte"] = JSON.parse(data);
+	})
+	.catch(err => {
+		console.error("Error reading the data file:", err);
+	});
+
+fs.readFile("./data/d3/strictly-increasing/links/prime.json", "utf8")
+	.then(data => {
+		dagData["strictlinkprime"] = JSON.parse(data);
+	})
+	.catch(err => {
+		console.error("Error reading the data file:", err);
+	});
+
+fs.readFile("./data/d3/strictly-increasing/links/primeforte.json", "utf8")
+	.then(data => {
+		dagData["strictlinkprimeforte"] = JSON.parse(data);
 	})
 	.catch(err => {
 		console.error("Error reading the data file:", err);
@@ -236,6 +309,22 @@ app.get("/api/data/complement/:query", (req, res) => {
 		return res.status(400).send("Bad Request: Incorrect Query or Query Not Found");
 
 	res.status(200).send(filteredData);
+});
+
+// query = cardinaldagprime || strictdagprime || cardinaldagprimeforte || strictdagprimeforte || cardinallinkprime || strictlinkprime || cardinallinkprimeforte || strictlinkprimeforte
+app.get("/api/data/d3/:query", (req, res) => {
+	if (!dataCache) return res.sendStatus(500);
+
+	const { query } = req.params;
+	if (query.length > 22) return res.status(414).send("URI Too Long: 22 characters or less");
+
+	const ret = dagData[query];
+
+	if (!ret) {
+		return res.status(400).send("Bad Request: Incorrect Query or Query Not Found");
+	}
+
+	res.status(200).send(ret);
 });
 
 // app.listen(port, () => {
