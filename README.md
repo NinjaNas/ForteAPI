@@ -932,7 +932,7 @@ complementRegex =
 	/^(null|\^?[1-9]?[0-9]-z?[1-9]?[0-9][AB]?\$?|\^[1-9]?[0-9]|\^[1-9]?[0-9]-|\^[1-9]?[0-9]-z?|\^[1-9]?[0-9]-z?[1-9]?[0-9]|[AB]\$|[1-9]?[0-9][AB]?\$|z?[1-9]?[0-9][AB]?\$|-z?[1-9]?[0-9][AB]?\$)$/;
 
 isD3ValidLength = input.length > 22;
-d3Regex = /cardinaldagprime|strictdagprime|cardinaldagprimeforte|strictdagprimeforte|cardinallinkprime|strictlinkprime|cardinallinkprimeforte|strictlinkprimeforte/;
+d3Regex = /^cardinaldagprime|strictdagprime|cardinaldagprimeforte|strictdagprimeforte|cardinallinkprime|strictlinkprime|cardinallinkprimeforte|strictlinkprimeforte$/;
 ```
 
 ## API Development
