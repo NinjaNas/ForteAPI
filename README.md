@@ -937,6 +937,8 @@ d3Regex = /cardinaldagprime|strictdagprime|cardinaldagprimeforte|strictdagprimef
 
 ## API Development
 
+Run ```npm i``` and uncomment ```app.listen(...)```
+
 ### Add .env File
 
 ```env
