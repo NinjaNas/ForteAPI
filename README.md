@@ -761,7 +761,7 @@ const layout = sugiyama()
 
 const { width, height } = layout(dagBuild as any)
 
-JSON.stringify(dagBuild) // NOTE: I added size property with width and height as post-processing, it is not a default property returned in the JSON by d3dag
+JSON.stringify(dagBuild) // NOTE: I added size property with width and height during post-processing, it is not a default property returned in the JSON by d3dag
 ```
 
 #### How to Use JSON in D3Dag
@@ -788,6 +788,17 @@ const dag = builder(JSON.parse(data))
 
 #### Endpoints
 
+Valid queries are:
+  - cardinaldagprime
+  - cardinaldagprimeforte
+  - cardinallinkprime
+  - cardinallinkprimeforte
+  - strictdagprime
+  - strictdagprimeforte
+  - strictlinkprime
+  - strictlinkprimeforte
+
+Some examples of the output:
 ```ts
 // GET /api/data/d3/cardinaldagprime
 {
