@@ -655,7 +655,7 @@ type Links = { source: string; target: string }[];
 type Dag = {
 	size: { width: number; height: number };
 	nodes: { x: number; y: number; data: string }[];
-	links: { source: string; target: string; points: number[][]; data: links };
+	links: { source: string; target: string; points: number[][]; data: Links };
 	v: number;
 };
 ```
@@ -771,7 +771,7 @@ type Link = { source: string; target: string }
 type Dag = {
 	size: { width: number; height: number };
 	nodes: { x: number; y: number; data: string }[];
-	links: { source: string; target: string; points: number[][]; data: links };
+	links: { source: string; target: string; points: number[][]; data: Link[] };
 	v: number;
 };
 
