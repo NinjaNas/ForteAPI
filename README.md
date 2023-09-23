@@ -652,7 +652,7 @@ A option for forte numbers, encoded like this "[\"0\"]|1-1", is added to allow t
 #### Types
 ```ts
 type Links = { source: string; target: string }[];
-type Dag = {
+type DagJSONObject = {
 	size: { width: number; height: number };
 	nodes: { x: number; y: number; data: string }[];
 	links: { source: string; target: string; points: number[][]; data: Links };
@@ -768,7 +768,7 @@ JSON.stringify(dagBuild) // NOTE: I added size property with width and height du
 
 ```ts
 type Link = { source: string; target: string }
-type Dag = {
+type DagJSONObject = {
 	size: { width: number; height: number };
 	nodes: { x: number; y: number; data: string }[];
 	links: { source: string; target: string; points: number[][]; data: Link[] };
@@ -776,7 +776,7 @@ type Dag = {
 };
 
 const res = await fetch('.../api/data/d3/strictdagprimeform/')
-const data: Dag = await res.json() 
+const data: DagJSONObject = await res.json() 
 const size: {width: number, height: number} = data.size // use to adjust the starting position of the graph or set the graph size
 
 const builder = graphJson()
