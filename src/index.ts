@@ -3,11 +3,17 @@ import express from "express";
 import serverless from "serverless-http";
 import rateLimit from "express-rate-limit";
 import cors from "cors";
-import fs from "fs/promises";
+import fs from "fs";
 
 const app = express();
 // const port = process.env.PORT || 8080;
 app.use(cors());
+// https://github.com/express-rate-limit/express-rate-limit/wiki/Troubleshooting-Proxy-Issues
+app.set("trust proxy", 1);
+// app.get("/ip", (request, response) => response.send(request.ip));
+// app.get("/x-forwarded-for", (request, response) =>
+// 	response.send(request.headers["x-forwarded-for"])
+// );
 dotenv.config();
 
 const RATE_LIMIT: number = 500;
@@ -46,81 +52,45 @@ let dataCache: DataSet[];
 const flatData: { [key: string]: (null | string)[] } = {};
 const dagData: { [key: string]: links | dag } = {};
 
-fs.readFile("./data/set_classes.json", "utf8")
-	.then(data => {
-		dataCache = JSON.parse(data);
-		flatData["prop"] = ["number", "primeForm", "vec", "z", "complement"];
-		flatData.prop.forEach(prop => {
-			flatData[prop as props] = dataCache.map(e => e[prop as props]);
-		});
-	})
-	.catch(err => {
-		console.error("Error reading the data file:", err);
-	});
+const dags = [
+	"cardinal,dag,prime",
+	"cardinal,dag,primeforte",
+	"cardinal,link,prime",
+	"cardinal,link,primeforte",
+	"strict,dag,prime",
+	"strict,dag,primeforte",
+	"strict,link,prime",
+	"strict,link,primeforte"
+];
 
-fs.readFile("./data/d3/cardinality-increasing/dags/prime.json", "utf8")
-	.then(data => {
-		dagData["cardinaldagprime"] = JSON.parse(data);
-	})
-	.catch(err => {
-		console.error("Error reading the data file:", err);
-	});
+const readFiles = () => {
+	setSetClasses();
 
-fs.readFile("./data/d3/cardinality-increasing/dags/primeforte.json", "utf8")
-	.then(data => {
-		dagData["cardinaldagprimeforte"] = JSON.parse(data);
-	})
-	.catch(err => {
-		console.error("Error reading the data file:", err);
+	dags.forEach((s: string) => {
+		const arr = s.split(",");
+		if (arr.length === 3) {
+			setDags(arr[0], arr[1], arr[2]);
+		}
 	});
+};
 
-fs.readFile("./data/d3/cardinality-increasing/links/prime.json", "utf8")
-	.then(data => {
-		dagData["cardinallinkprime"] = JSON.parse(data);
-	})
-	.catch(err => {
-		console.error("Error reading the data file:", err);
+const setSetClasses = () => {
+	const data = fs.readFileSync("./data/set_classes.json", "utf8");
+	dataCache = JSON.parse(data);
+	flatData["prop"] = ["number", "primeForm", "vec", "z", "complement"];
+	flatData.prop.forEach(prop => {
+		flatData[prop as props] = dataCache.map(e => e[prop as props]);
 	});
+};
 
-fs.readFile("./data/d3/cardinality-increasing/links/primeforte.json", "utf8")
-	.then(data => {
-		dagData["cardinallinkprimeforte"] = JSON.parse(data);
-	})
-	.catch(err => {
-		console.error("Error reading the data file:", err);
-	});
-
-fs.readFile("./data/d3/strictly-increasing/dags/prime.json", "utf8")
-	.then(data => {
-		dagData["strictdagprime"] = JSON.parse(data);
-	})
-	.catch(err => {
-		console.error("Error reading the data file:", err);
-	});
-
-fs.readFile("./data/d3/strictly-increasing/dags/primeforte.json", "utf8")
-	.then(data => {
-		dagData["strictdagprimeforte"] = JSON.parse(data);
-	})
-	.catch(err => {
-		console.error("Error reading the data file:", err);
-	});
-
-fs.readFile("./data/d3/strictly-increasing/links/prime.json", "utf8")
-	.then(data => {
-		dagData["strictlinkprime"] = JSON.parse(data);
-	})
-	.catch(err => {
-		console.error("Error reading the data file:", err);
-	});
-
-fs.readFile("./data/d3/strictly-increasing/links/primeforte.json", "utf8")
-	.then(data => {
-		dagData["strictlinkprimeforte"] = JSON.parse(data);
-	})
-	.catch(err => {
-		console.error("Error reading the data file:", err);
-	});
+const setDags = (connectionType: string, jsonType: string, textType: string) => {
+	// dagData["cardinaldagprime"] = JSON.parse(data);
+	const data = fs.readFileSync(
+		`./data/d3/${connectionType}-increasing/${jsonType}s/${textType}.json`,
+		"utf8"
+	);
+	dagData[connectionType + jsonType + textType] = JSON.parse(data);
+};
 
 const filterFunc = (q: string, prop: string) => {
 	if (q === "null") {
@@ -135,6 +105,8 @@ const filterFunc = (q: string, prop: string) => {
 		return (e: { [key: string]: string }) => e[prop] === q;
 	}
 };
+
+readFiles();
 
 app.get("/api/data", (req, res) => {
 	if (!dataCache) return res.sendStatus(500);
@@ -313,16 +285,15 @@ app.get("/api/data/complement/:query", (req, res) => {
 
 // query = cardinaldagprime || strictdagprime || cardinaldagprimeforte || strictdagprimeforte || cardinallinkprime || strictlinkprime || cardinallinkprimeforte || strictlinkprimeforte
 app.get("/api/data/d3/:query", (req, res) => {
-	if (!dataCache) return res.sendStatus(500);
-
 	const { query } = req.params;
 	if (query.length > 22) return res.status(414).send("URI Too Long: 22 characters or less");
-
 	const ret = dagData[query];
 
-	if (!ret) {
+	if (!dags.map((s: string) => s.replace(/,/g, "")).includes(query)) {
 		return res.status(400).send("Bad Request: Incorrect Query or Query Not Found");
 	}
+
+	if (!dagData[query]) return res.sendStatus(500);
 
 	res.status(200).send(ret);
 });

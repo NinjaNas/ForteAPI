@@ -2,7 +2,7 @@ import chai from "chai";
 import chaiHttp from "chai-http";
 import server from "../src/index";
 const should = chai.should();
-import fs from "fs/promises";
+import fs from "fs";
 
 chai.use(chaiHttp);
 
@@ -29,81 +29,47 @@ let dataCache: DataSet[];
 const flatData: { [key: string]: (null | string)[] } = {};
 const dagData: { [key: string]: links | dag } = {};
 
-fs.readFile("./data/set_classes.json", "utf8")
-	.then(data => {
-		dataCache = JSON.parse(data);
-		flatData["prop"] = ["number", "primeForm", "vec", "z", "complement"];
-		flatData.prop.forEach(prop => {
-			flatData[prop as props] = dataCache.map(e => e[prop as props]);
-		});
-	})
-	.catch(err => {
-		console.error("Error reading the data file:", err);
-	});
+const dags = [
+	"cardinal,dag,prime",
+	"cardinal,dag,primeforte",
+	"cardinal,link,prime",
+	"cardinal,link,primeforte",
+	"strict,dag,prime",
+	"strict,dag,primeforte",
+	"strict,link,prime",
+	"strict,link,primeforte"
+];
 
-fs.readFile("./data/d3/cardinality-increasing/dags/prime.json", "utf8")
-	.then(data => {
-		dagData["cardinaldagprime"] = JSON.parse(data);
-	})
-	.catch(err => {
-		console.error("Error reading the data file:", err);
-	});
+const readFiles = () => {
+	setSetClasses();
 
-fs.readFile("./data/d3/cardinality-increasing/dags/primeforte.json", "utf8")
-	.then(data => {
-		dagData["cardinaldagprimeforte"] = JSON.parse(data);
-	})
-	.catch(err => {
-		console.error("Error reading the data file:", err);
+	dags.forEach((s: string) => {
+		const arr = s.split(",");
+		if (arr.length === 3) {
+			setDags(arr[0], arr[1], arr[2]);
+		}
 	});
+};
 
-fs.readFile("./data/d3/cardinality-increasing/links/prime.json", "utf8")
-	.then(data => {
-		dagData["cardinallinkprime"] = JSON.parse(data);
-	})
-	.catch(err => {
-		console.error("Error reading the data file:", err);
+const setSetClasses = () => {
+	const data = fs.readFileSync("./data/set_classes.json", "utf8");
+	dataCache = JSON.parse(data);
+	flatData["prop"] = ["number", "primeForm", "vec", "z", "complement"];
+	flatData.prop.forEach(prop => {
+		flatData[prop as props] = dataCache.map(e => e[prop as props]);
 	});
+};
 
-fs.readFile("./data/d3/cardinality-increasing/links/primeforte.json", "utf8")
-	.then(data => {
-		dagData["cardinallinkprimeforte"] = JSON.parse(data);
-	})
-	.catch(err => {
-		console.error("Error reading the data file:", err);
-	});
+const setDags = (connectionType: string, jsonType: string, textType: string) => {
+	// dagData["cardinaldagprime"] = JSON.parse(data);
+	const data = fs.readFileSync(
+		`./data/d3/${connectionType}-increasing/${jsonType}s/${textType}.json`,
+		"utf8"
+	);
+	dagData[connectionType + jsonType + textType] = JSON.parse(data);
+};
 
-fs.readFile("./data/d3/strictly-increasing/dags/prime.json", "utf8")
-	.then(data => {
-		dagData["strictdagprime"] = JSON.parse(data);
-	})
-	.catch(err => {
-		console.error("Error reading the data file:", err);
-	});
-
-fs.readFile("./data/d3/strictly-increasing/dags/primeforte.json", "utf8")
-	.then(data => {
-		dagData["strictdagprimeforte"] = JSON.parse(data);
-	})
-	.catch(err => {
-		console.error("Error reading the data file:", err);
-	});
-
-fs.readFile("./data/d3/strictly-increasing/links/prime.json", "utf8")
-	.then(data => {
-		dagData["strictlinkprime"] = JSON.parse(data);
-	})
-	.catch(err => {
-		console.error("Error reading the data file:", err);
-	});
-
-fs.readFile("./data/d3/strictly-increasing/links/primeforte.json", "utf8")
-	.then(data => {
-		dagData["strictlinkprimeforte"] = JSON.parse(data);
-	})
-	.catch(err => {
-		console.error("Error reading the data file:", err);
-	});
+readFiles();
 
 describe("API Endpoints", () => {
 	describe("GET /api (does not exist)", () => {
