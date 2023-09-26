@@ -12,7 +12,7 @@ Forte API is a music theory API that provides a way to query set classes in 12 t
 ##
 
 **Currently this API is live [here](https://hcda8f8dtk.execute-api.us-east-1.amazonaws.com/prod/api/data/) using AWS API Gateway + AWS Lambda!**
-**Check out the OpenAPI docs on SwaggerHub [here](https://app.swaggerhub.com/apis-docs/NinjaNas/ForteAPI/1.2.0)!**
+**Check out the OpenAPI docs on SwaggerHub [here](https://app.swaggerhub.com/apis-docs/NinjaNas/ForteAPI/1.2.1)!**
 
 **The API is rate-limited at 500 requests per day. Make an issue if you need more requests.**
 
@@ -59,8 +59,16 @@ Forte API is a music theory API that provides a way to query set classes in 12 t
     - [Exact Search](#exact-search-4)
     - [Starts With Search](#starts-with-search-2)
     - [Ends With Search](#ends-with-search-2)
+  - [GET /api/data/d3/:query](#get-apidatad3query)
+    - [Types](#types)
+    - [Cardinality-Increasing vs Strict-Increasing](#cardinality-increasing-vs-strict-increasing)
+    - [Manual Construction](#manual-construction)
+    	- [Links](#links)
+     	- [Dag](#dag)
+    - [How to Use JSON in D3Dag](#how-to-use-json-in-d3dag)
+    - [Endpoints](#endpoints)
 - [Using this API in your app](#using-this-api-in-your-app)
-  - [Client-Side Validation](#client-side-validation)
+  - [Simple Client-Side Validation](#simple-client-side-validation)
 - [API Development](#api-development)
   - [Add .env File](#add-env-file)
 - [Star This Repo](#star-this-repo)
@@ -126,9 +134,11 @@ Complements are pairs of sets that add up to set with all pitch classes {0,1,2,3
 
 ## Should I use this API?
 
-You should only use this API either if you care about your intital load times as the full data size is ~42KB or if you want a prebuilt solution to query set classes.
+You should only use this API either if you care about your intital load times as the full data size is ~42KB or if you want a prebuilt solution to query set classes. You can use this API to get and serve prebuilt d3dag graphs for visualization or the just the links for you to create your own custom graphs. 
 
 If you do not need to use this API, you should just download the json [here](https://github.com/NinjaNas/ForteAPI/blob/main/data/set_classes.json). Report any typos you may find or suggest new properties.
+
+There are also d3dag graphs and links avaliable in JSON [here](https://github.com/NinjaNas/ForteAPI/blob/main/data/d3).
 
 ## DataSet Type
 
@@ -631,6 +641,257 @@ The endpoint returns an array of objects based on the query on the complement pr
 ];
 ```
 
+### GET /api/data/d3/:query
+
+The endpoint returns either json for a valid d3dag graph or json for valid dag links
+
+A option for forte numbers, encoded like this "[\"0\"]|1-1", is added to allow the ability to toggle between primeForm and number on a d3dag by splitting on "|"
+
+- Max URI length: No more than 22 characters
+
+#### Types
+```ts
+type Links = { source: string; target: string }[];
+type DagJSONObject = {
+	size: { width: number; height: number };
+	nodes: { x: number; y: number; data: string }[];
+	links: { source: string; target: string; points: number[][]; data: Links };
+	v: number;
+};
+```
+
+#### Cardinality-Increasing vs Strict-Increasing
+
+The operations here are done on the primeForm property.
+
+Cardinality-increasing here means the target set is a proper superset of the source set where the target set is greater in length by 1
+
+```ts
+  {
+    "source": "[\"0\"]",
+    "target": "[\"0\",\"1\"]"
+  }
+```
+
+Strict-increasing here means the target set is a proper superset of the source set where the target set is greater in length by 1 AND the next number of the target set must be greater than the largest number in source set (lexicographically greater).
+
+When comparing [\"0\",\"2\",\"3\",\"4\"] > [\"0\",\"2\",\"3\"], it returns true
+While comparing [\"0\",\"1\",\"3\",\"4\"] > [\"0\",\"2\",\"3\"], it returns false
+```ts
+  {
+    "source": "[\"0\",\"2\",\"3\"]",
+    "target": "[\"0\",\"2\",\"3\",\"4\"]"
+  }
+```
+#### Manual Construction
+
+The json files here can be recreated using the set_classes.json file.
+
+##### Links
+```ts
+// prime
+const flatRes = await fetch('.../api/flatdata/primeForm/')
+const data: string[] = await flatRes.json()
+linkBuilder(data, true) // change 2nd arg to false for cardinal
+
+const linkBuilder = (data: string[], condition: strict = true) => {
+  const newData: string[][] = data.map((s) => s.slice(1, -1).split(','))
+  let links: Link[] = [{ source: '[""]', target: '["0"]' }]
+
+  for (const s of newData) {
+    for (const t of newData) {
+      if (
+        s.every((e) => t.includes(e)) &&
+        s.length === t.length - 1 &&
+        (strict ? t > s : true)
+      ) {
+        links.push({ source: '[' + s.toString() + ']', target: '[' + t.toString() + ']' })
+      }
+    }
+  }
+  return links
+}
+
+// primeforte
+const res = await fetch('.../api/data/number,primeForm/')
+const data: { number: string; primeForm: string }[] = await res.json()
+linkBuilder(data, true) // change 2nd arg to false for cardinal
+
+const linkBuilder = (data: { number: string; primeForm: string }[], strict: boolean = true) => {
+  const newData: { number: string; primeForm: string[] }[] = data.map((s) => ({
+    primeForm: s.primeForm.slice(1, -1).split(','),
+    number: s.number
+  }))
+  let links: Link[] = [{ source: '[""]|0-1', target: '["0"]|1-1' }]
+
+  for (const s of newData) {
+    for (const t of newData) {
+      if (
+        s.primeForm.every((e) => t.primeForm.includes(e)) &&
+        s.primeForm.length === t.primeForm.length - 1 &&
+        (strict ? t.primeForm > s.primeForm : true)
+      ) {
+        links.push({
+          source: '[' + s.primeForm.toString() + ']' + '|' + s.number,
+          target: '[' + t.primeForm.toString() + ']' + '|' + t.number
+        })
+      }
+    }
+  }
+  return links
+}
+```
+
+##### Dag
+
+```ts
+import * as d3 from 'd3'
+import * from 'd3-dag'
+const builder = graphConnect()
+    .sourceId(({ source }: { source: string }) => source)
+    .targetId(({ target }: { target: string }) => target)
+const dagBuild = builder(links.value)
+const layout = sugiyama()
+    .layering(layeringSimplex())
+    .decross(decrossTwoLayer().order(twolayerGreedy().base(twolayerAgg())))
+    .coord(coordSimplex())
+    .nodeSize([2 * NODE_RADIUS, 2 * NODE_RADIUS])
+    .gap([NODE_RADIUS, NODE_RADIUS])
+    .tweaks([tweakShape([2 * NODE_RADIUS, 2 * NODE_RADIUS], shapeEllipse)])
+
+const { width, height } = layout(dagBuild as any)
+
+JSON.stringify(dagBuild) // NOTE: I added size property with width and height during post-processing, it is not a default property returned in the JSON by d3dag
+```
+
+#### How to Use JSON in D3Dag
+
+```ts
+type Link = { source: string; target: string }
+type DagJSONObject = {
+	size: { width: number; height: number };
+	nodes: { x: number; y: number; data: string }[];
+	links: { source: string; target: string; points: number[][]; data: Link[] };
+	v: number;
+};
+
+const res = await fetch('.../api/data/d3/strictdagprimeform/')
+const data: DagJSONObject = await res.json() 
+const size: {width: number, height: number} = data.size // use to adjust the starting position of the graph or set the graph size
+
+const builder = graphJson()
+      .nodeDatum((data) => data as string)
+      .linkDatum((data) => data as Link)
+const dag = builder(JSON.parse(data))
+// perform d3 visualizations using dag.nodes() and dag.links()
+```
+
+#### Endpoints
+
+Valid queries are:
+  - cardinaldagprime
+  - cardinaldagprimeforte
+  - cardinallinkprime
+  - cardinallinkprimeforte
+  - strictdagprime
+  - strictdagprimeforte
+  - strictlinkprime
+  - strictlinkprimeforte
+
+Some examples of the output:
+```ts
+// GET /api/data/d3/cardinaldagprime
+{
+  "size": {
+    "width": 11950,
+    "height": 1900
+  },
+  "nodes": [
+    {
+      "x": 5450,
+      "y": 200,
+      "data": "[\"0\"]"
+    },
+     ...
+   ],
+  "links": [
+    {
+      "source": 0,
+      "target": 8,
+      "points": [
+        [
+          5497.4341649025255,
+          215.81138830084188
+        ],
+        [
+          5852.5658350974745,
+          334.1886116991581
+        ]
+      ],
+      "data": {
+        "source": "[\"0\"]",
+        "target": "[\"0\",\"1\"]"
+      }
+    },
+     ...
+   ],
+   "v": 1
+}
+// GET /api/data/d3/cardinaldagprimeforte
+{
+  "size": {
+    "width": 11950,
+    "height": 1900
+  },
+  "nodes": [
+    {
+      "x": 5450,
+      "y": 200,
+      "data": "[\"0\"]|1-1"
+    },
+     ...
+   ],
+  "links": [
+    {
+      "source": 0,
+      "target": 8,
+      "points": [
+        [
+          5497.4341649025255,
+          215.81138830084188
+        ],
+        [
+          5852.5658350974745,
+          334.1886116991581
+        ]
+      ],
+      "data": {
+        "source": "[\"0\"]|1-1",
+        "target": "[\"0\",\"1\"]|2-1"
+      }
+    },
+     ...
+   ],
+   "v": 1
+}
+// GET /api/data/d3/cardinallinkprime
+[
+  {
+    "source": "[\"\"]",
+    "target": "[\"0\"]"
+  },
+   ...
+]
+// GET /api/data/d3/cardinallinkprimeforte
+[
+  {
+    "source": "[\"\"]|0-1",
+    "target": "[\"0\"]|1-1"
+  },
+   ...
+]
+```
+
 ## Using this API in your app
 
 ### Simple Client-Side Validation
@@ -669,9 +930,14 @@ zRegex =
 isComplementValidLength = input.length > 8;
 complementRegex =
 	/^(null|\^?[1-9]?[0-9]-z?[1-9]?[0-9][AB]?\$?|\^[1-9]?[0-9]|\^[1-9]?[0-9]-|\^[1-9]?[0-9]-z?|\^[1-9]?[0-9]-z?[1-9]?[0-9]|[AB]\$|[1-9]?[0-9][AB]?\$|z?[1-9]?[0-9][AB]?\$|-z?[1-9]?[0-9][AB]?\$)$/;
+
+isD3ValidLength = input.length > 22;
+d3Regex = /^cardinaldagprime|strictdagprime|cardinaldagprimeforte|strictdagprimeforte|cardinallinkprime|strictlinkprime|cardinallinkprimeforte|strictlinkprimeforte$/;
 ```
 
 ## API Development
+
+Run ```npm i``` and uncomment ```app.listen(...)```
 
 ### Add .env File
 
