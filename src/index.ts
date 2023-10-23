@@ -261,7 +261,7 @@ app.get("/api/data/complement/:query", (req, res) => {
 	res.status(200).send(filteredData);
 });
 
-// query = cardinaldagprime || strictdagprime || cardinaldagprimeforte || strictdagprimeforte || cardinallinkprime || strictlinkprime || cardinallinkprimeforte || strictlinkprimeforte
+// query = cardinaldaginversions || strictdaginversions || cardinallinkinversions || strictlinkinversions
 app.get("/api/data/d3/:query", (req, res) => {
 	const { query } = req.params;
 	if (query.length > 22) return res.status(414).send("URI Too Long: 22 characters or less");
