@@ -224,7 +224,7 @@ app.get("/api/data/vec/:querySearch/:queryInequality", (req, res) => {
 	if (queryInequality.length > 2)
 		return res.status(414).send("URI Too Long (inequality query): 2 characters or less");
 
-	const formatForte = (s: string) => {
+	const formatVec = (s: string) => {
 		return s.replace(/T/g, "10").replace(/C/g, "12");
 	};
 
@@ -255,9 +255,7 @@ app.get("/api/data/vec/:querySearch/:queryInequality", (req, res) => {
 			querySearch
 				.replace(/[<>]/g, "")
 				.split(",")
-				.every((val, i) =>
-					filterInequality(formatForte(e[prop].charAt(1 + 2 * i)), formatForte(val))
-				)
+				.every((val, i) => filterInequality(formatVec(e[prop].charAt(1 + 2 * i)), formatVec(val)))
 		);
 	};
 
@@ -269,8 +267,7 @@ app.get("/api/data/vec/:querySearch/:queryInequality", (req, res) => {
 					.split("")
 					.every(
 						(val, i) =>
-							val === "X" ||
-							filterInequality(formatForte(e[prop].charAt(1 + 2 * i)), formatForte(val))
+							val === "X" || filterInequality(formatVec(e[prop].charAt(1 + 2 * i)), formatVec(val))
 					)
 		);
 	};
