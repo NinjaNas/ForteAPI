@@ -6,47 +6,25 @@ import fs from "fs";
 
 chai.use(chaiHttp);
 
-type DataSet = {
-	number: string;
-	primeForm: string;
-	vec: string;
-	z: null | string;
-	complement: null | string;
-};
-
-type props = "number" | "primeForm" | "vec" | "z" | "complement";
-
-type links = { source: string; target: string }[];
-type dag = {
-	size: { width: number; height: number };
-	nodes: { x: number; y: number; data: string }[];
-	links: { source: string; target: string; points: number[][]; data: links };
-	v: number;
-};
-
 let dataCache: DataSet[];
 
-const flatData: { [key: string]: (null | string)[] } = {};
-const dagData: { [key: string]: links | dag } = {};
+const flatData: FlatData = {};
+const d3Data: D3Data = {};
 
-const dags = [
-	"cardinal,dag,prime",
-	"cardinal,dag,primeforte",
-	"cardinal,link,prime",
-	"cardinal,link,primeforte",
-	"strict,dag,prime",
-	"strict,dag,primeforte",
-	"strict,link,prime",
-	"strict,link,primeforte"
+const d3 = [
+	"cardinal,dag,inversions",
+	"cardinal,link,inversions",
+	"strict,dag,inversions",
+	"strict,link,inversions"
 ];
 
 const readFiles = () => {
 	setSetClasses();
 
-	dags.forEach((s: string) => {
+	d3.forEach((s: string) => {
 		const arr = s.split(",");
 		if (arr.length === 3) {
-			setDags(arr[0], arr[1], arr[2]);
+			setD3(arr[0], arr[1], arr[2]);
 		}
 	});
 };
@@ -56,17 +34,17 @@ const setSetClasses = () => {
 	dataCache = JSON.parse(data);
 	flatData["prop"] = ["number", "primeForm", "vec", "z", "complement"];
 	flatData.prop.forEach(prop => {
-		flatData[prop as props] = dataCache.map(e => e[prop as props]);
+		flatData[prop as Props] = dataCache.map(e => e[prop as Props]);
 	});
 };
 
-const setDags = (connectionType: string, jsonType: string, textType: string) => {
+const setD3 = (connectionType: string, jsonType: string, textType: string) => {
 	// dagData["cardinaldagprime"] = JSON.parse(data);
 	const data = fs.readFileSync(
 		`./data/d3/${connectionType}-increasing/${jsonType}s/${textType}.json`,
 		"utf8"
 	);
-	dagData[connectionType + jsonType + textType] = JSON.parse(data);
+	d3Data[connectionType + jsonType + textType] = JSON.parse(data);
 };
 
 readFiles();
@@ -6156,97 +6134,49 @@ describe("GET /api/data/d3/:query", () => {
 			});
 	});
 
-	it("should return 200 and correct data, cardinallinkprimeforte", done => {
+	it("should return 200 and correct data, cardinallinkinversions", done => {
 		chai
 			.request(server)
-			.get("/api/data/d3/cardinallinkprimeforte")
+			.get("/api/data/d3/cardinallinkinversions")
 			.end((err, res) => {
 				should.not.exist(err);
-				res.body.should.deep.equal(dagData["cardinallinkprimeforte"]);
+				res.body.should.deep.equal(d3Data["cardinallinkinversions"]);
 				res.should.have.status(200);
 				done();
 			});
 	});
 
-	it("should return 200 and correct data, cardinallinkprime", done => {
+	it("should return 200 and correct data, cardinaldaginversions", done => {
 		chai
 			.request(server)
-			.get("/api/data/d3/cardinallinkprime")
+			.get("/api/data/d3/cardinaldaginversions")
 			.end((err, res) => {
 				should.not.exist(err);
-				res.body.should.deep.equal(dagData["cardinallinkprime"]);
+				res.body.should.deep.equal(d3Data["cardinaldaginversions"]);
 				res.should.have.status(200);
 				done();
 			});
 	});
 
-	it("should return 200 and correct data, cardinaldagprimeforte", done => {
+	it("should return 200 and correct data, strictlinkinversions", done => {
 		chai
 			.request(server)
-			.get("/api/data/d3/cardinaldagprimeforte")
+			.get("/api/data/d3/strictlinkinversions")
 			.end((err, res) => {
 				should.not.exist(err);
-				res.body.should.deep.equal(dagData["cardinaldagprimeforte"]);
+				res.body.should.deep.equal(d3Data["strictlinkinversions"]);
 				res.should.have.status(200);
 				done();
 			});
 	});
 
-	it("should return 200 and correct data, cardinaldagprime", done => {
+	it("should return 200 and correct data, strictdaginversions", done => {
 		chai
 			.request(server)
-			.get("/api/data/d3/cardinaldagprime")
+			.get("/api/data/d3/strictdaginversions")
 			.end((err, res) => {
 				should.not.exist(err);
-				res.body.should.deep.equal(dagData["cardinaldagprime"]);
-				res.should.have.status(200);
-				done();
-			});
-	});
-
-	it("should return 200 and correct data, strictlinkprimeforte", done => {
-		chai
-			.request(server)
-			.get("/api/data/d3/strictlinkprimeforte")
-			.end((err, res) => {
-				should.not.exist(err);
-				res.body.should.deep.equal(dagData["strictlinkprimeforte"]);
-				res.should.have.status(200);
-				done();
-			});
-	});
-
-	it("should return 200 and correct data, strictlinkprime", done => {
-		chai
-			.request(server)
-			.get("/api/data/d3/strictlinkprime")
-			.end((err, res) => {
-				should.not.exist(err);
-				res.body.should.deep.equal(dagData["strictlinkprime"]);
-				res.should.have.status(200);
-				done();
-			});
-	});
-
-	it("should return 200 and correct data, strictdagprimeforte", done => {
-		chai
-			.request(server)
-			.get("/api/data/d3/strictdagprimeforte")
-			.end((err, res) => {
-				should.not.exist(err);
-				res.body.should.deep.equal(dagData["strictdagprimeforte"]);
-				res.should.have.status(200);
-				done();
-			});
-	});
-
-	it("should return 200 and correct data, strictdagprime", done => {
-		chai
-			.request(server)
-			.get("/api/data/d3/strictdagprime")
-			.end((err, res) => {
-				should.not.exist(err);
-				res.body.should.deep.equal(dagData["strictdagprime"]);
+				res.body.should.deep.equal(d3Data["strictdaginversions"]);
 				res.should.have.status(200);
 				done();
 			});

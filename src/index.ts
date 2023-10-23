@@ -29,47 +29,25 @@ const limiter = rateLimit({
 // Apply the rate limiting middleware to all requests
 app.use(limiter);
 
-type DataSet = {
-	number: string;
-	primeForm: string;
-	vec: string;
-	z: null | string;
-	complement: null | string;
-};
-
-type props = "number" | "primeForm" | "vec" | "z" | "complement";
-
-type links = { source: string; target: string }[];
-type dag = {
-	size: { width: number; height: number };
-	nodes: { x: number; y: number; data: string }[];
-	links: { source: string; target: string; points: number[][]; data: links };
-	v: number;
-};
-
 let dataCache: DataSet[];
 
-const flatData: { [key: string]: (null | string)[] } = {};
-const dagData: { [key: string]: links | dag } = {};
+const flatData: FlatData = {};
+const d3Data: D3Data = {};
 
-const dags = [
-	"cardinal,dag,prime",
-	"cardinal,dag,primeforte",
-	"cardinal,link,prime",
-	"cardinal,link,primeforte",
-	"strict,dag,prime",
-	"strict,dag,primeforte",
-	"strict,link,prime",
-	"strict,link,primeforte"
+const d3 = [
+	"cardinal,dag,inversions",
+	"cardinal,link,inversions",
+	"strict,dag,inversions",
+	"strict,link,inversions"
 ];
 
 const readFiles = () => {
 	setSetClasses();
 
-	dags.forEach((s: string) => {
+	d3.forEach((s: string) => {
 		const arr = s.split(",");
 		if (arr.length === 3) {
-			setDags(arr[0], arr[1], arr[2]);
+			setD3(arr[0], arr[1], arr[2]);
 		}
 	});
 };
@@ -79,17 +57,17 @@ const setSetClasses = () => {
 	dataCache = JSON.parse(data);
 	flatData["prop"] = ["number", "primeForm", "vec", "z", "complement"];
 	flatData.prop.forEach(prop => {
-		flatData[prop as props] = dataCache.map(e => e[prop as props]);
+		flatData[prop as Props] = dataCache.map(e => e[prop as Props]);
 	});
 };
 
-const setDags = (connectionType: string, jsonType: string, textType: string) => {
+const setD3 = (connectionType: string, jsonType: string, textType: string) => {
 	// dagData["cardinaldagprime"] = JSON.parse(data);
 	const data = fs.readFileSync(
 		`./data/d3/${connectionType}-increasing/${jsonType}s/${textType}.json`,
 		"utf8"
 	);
-	dagData[connectionType + jsonType + textType] = JSON.parse(data);
+	d3Data[connectionType + jsonType + textType] = JSON.parse(data);
 };
 
 const filterFunc = (q: string, prop: string) => {
@@ -132,7 +110,7 @@ app.get("/api/data/:prop/", (req, res) => {
 
 	for (const d of tempDataCache) {
 		for (const p of propsToRemove) {
-			delete d[p as props];
+			delete d[p as Props];
 		}
 	}
 
@@ -287,13 +265,13 @@ app.get("/api/data/complement/:query", (req, res) => {
 app.get("/api/data/d3/:query", (req, res) => {
 	const { query } = req.params;
 	if (query.length > 22) return res.status(414).send("URI Too Long: 22 characters or less");
-	const ret = dagData[query];
+	const ret = d3Data[query];
 
-	if (!dags.map((s: string) => s.replace(/,/g, "")).includes(query)) {
+	if (!d3.map((s: string) => s.replace(/,/g, "")).includes(query)) {
 		return res.status(400).send("Bad Request: Incorrect Query or Query Not Found");
 	}
 
-	if (!dagData[query]) return res.sendStatus(500);
+	if (!d3Data[query]) return res.sendStatus(500);
 
 	res.status(200).send(ret);
 });
