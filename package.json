@@ -36,7 +36,7 @@
 		"@types/mocha": "^10.0.1",
 		"@types/node": "^20.4.9",
 		"@typescript-eslint/eslint-plugin": "^6.8.0",
-		"@typescript-eslint/parser": "^6.7.5",
+		"@typescript-eslint/parser": "^6.9.0",
 		"chai": "^4.3.8",
 		"chai-http": "^4.4.0",
 		"eslint": "^8.50.0",
