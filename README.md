@@ -788,6 +788,8 @@ const dag = builder(JSON.parse(data))
 
 #### Endpoints
 
+**The prime endpoints will be REMOVED in 1.3.0 due to the primeforte endpoints already containing the information**
+
 Valid queries are:
   - cardinaldagprime
   - cardinaldagprimeforte
