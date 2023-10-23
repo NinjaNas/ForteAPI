@@ -232,7 +232,7 @@ app.get("/api/data/vec/:querySearch/:queryInequality", (req, res) => {
 		const left = parseInt(leftStr);
 		const right = parseInt(rightStr);
 
-		if ((!left && left != 0) || (!right && right != 0)) {
+		if ((!left && left !== 0) || (!right && right !== 0)) {
 			return false;
 		}
 
