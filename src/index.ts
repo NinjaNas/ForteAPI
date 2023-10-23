@@ -6,7 +6,7 @@ import cors from "cors";
 import fs from "fs";
 
 const app = express();
-// const port = process.env.PORT || 8080;
+const port = process.env.PORT || 8080;
 app.use(cors());
 // https://github.com/express-rate-limit/express-rate-limit/wiki/Troubleshooting-Proxy-Issues
 app.set("trust proxy", 1);
@@ -184,7 +184,6 @@ app.get("/api/data/primeForm/:query", (req, res) => {
 						!query.includes(",") && query.split("").every(val => JSON.parse(e[prop]).includes(val))
 			  );
 
-	// spread set into an array then convert back to JSON
 	if (!filteredData.length)
 		return res.status(400).send("Bad Request: Incorrect Query or Query Not Found");
 
@@ -205,12 +204,82 @@ app.get("/api/data/vec/:query", (req, res) => {
 			: dataCache.filter(
 					e =>
 						query.length === 6 &&
-						query.split("").every((val, i) => val === "X" || e[prop].charAt(1 + 2 * i) === val)
+						query.split("").every((val, i) => val === "X" || e[prop].charAt(1 + 2 * i) === val) // <1,1,1,1,1,1> vs 111111
 			  );
 
-	// spread set into an array then convert back to JSON
 	if (!filteredData.length)
 		return res.status(400).send("Bad Request: Incorrect Query or Query Not Found");
+
+	res.status(200).send(filteredData);
+});
+
+// querySearch = <1,1,1,1,1,1> || 111111 || 1X1X1X / queryInequality = g || l || ge || le
+app.get("/api/data/vec/:querySearch/:queryInequality", (req, res) => {
+	if (!dataCache) return res.sendStatus(500);
+
+	const prop = "vec";
+	const { querySearch, queryInequality } = req.params;
+	if (querySearch.length > 13)
+		return res.status(414).send("URI Too Long (search query): 13 characters or less");
+	if (queryInequality.length > 2)
+		return res.status(414).send("URI Too Long (inequality query): 2 characters or less");
+
+	const formatForte = (s: string) => {
+		return s.replace(/T/g, "10").replace(/C/g, "12");
+	};
+
+	const filterInequality = (leftStr: string, rightStr: string) => {
+		const left = parseInt(leftStr);
+		const right = parseInt(rightStr);
+
+		if ((!left && left != 0) || (!right && right != 0)) {
+			return false;
+		}
+
+		switch (queryInequality) {
+			case "g":
+				return left > right;
+			case "l":
+				return left < right;
+			case "ge":
+				return left >= right;
+			case "le":
+				return left <= right;
+			default:
+				return false;
+		}
+	};
+
+	const exactSearch = () => {
+		return dataCache.filter(e =>
+			querySearch
+				.replace(/[<>]/g, "")
+				.split(",")
+				.every((val, i) =>
+					filterInequality(formatForte(e[prop].charAt(1 + 2 * i)), formatForte(val))
+				)
+		);
+	};
+
+	const fuzzySearch = () => {
+		return dataCache.filter(
+			e =>
+				querySearch.length === 6 &&
+				querySearch
+					.split("")
+					.every(
+						(val, i) =>
+							val === "X" ||
+							filterInequality(formatForte(e[prop].charAt(1 + 2 * i)), formatForte(val))
+					)
+		);
+	};
+
+	const filteredData: DataSet[] =
+		querySearch.at(0) === "<" && querySearch.at(-1) === ">" ? exactSearch() : fuzzySearch();
+
+	if (!filteredData.length)
+		return res.status(400).send("Bad Request: Incorrect Query or Query Not Found"); // can be due to bad inequality query
 
 	res.status(200).send(filteredData);
 });
@@ -276,8 +345,8 @@ app.get("/api/data/d3/:query", (req, res) => {
 	res.status(200).send(ret);
 });
 
-// app.listen(port, () => {
-// 	console.log(`server started at http://localhost:${port}`);
-// });
+app.listen(port, () => {
+	console.log(`server started at http://localhost:${port}`);
+});
 export default app;
 export const handler = serverless(app);
