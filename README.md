@@ -1,4 +1,9 @@
 # ForteAPI
+<div align="center">
+<h3></h3>
+<img width="100" height="100" src="https://img.icons8.com/ios-filled/100/curly-brackets.png" alt="curly-brackets"/>
+<h3></h3>
+</div>
 
 <div align="center">
 <img alt="GitHub last commit (branch)" src="https://img.shields.io/github/last-commit/NinjaNas/ForteAPI/main">
