@@ -69,7 +69,7 @@ const setD3 = (connectionType: string, jsonType: string, textType: string) => {
 	d3Data[connectionType + jsonType + textType] = JSON.parse(data);
 };
 
-// formatArrToString should be used for primeForm and inversion
+// formatArrToString should be used for primeForm, vec, and inversion
 const filterFunc = (
 	q: string,
 	prop: string,
