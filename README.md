@@ -11,6 +11,8 @@ Forte API is a music theory API that provides a way to query set classes in 12 t
 
 ##
 
+**This API is going through an overhaul of the endpoints and functionalities, please wait until v1.3.0 before using! Thank You! :)**
+
 **Currently this API is live [here](https://hcda8f8dtk.execute-api.us-east-1.amazonaws.com/prod/api/data/) using AWS API Gateway + AWS Lambda!**
 **Check out the OpenAPI docs on SwaggerHub [here](https://app.swaggerhub.com/apis-docs/NinjaNas/ForteAPI/1.2.1)!**
 
