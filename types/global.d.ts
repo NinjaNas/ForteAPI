@@ -4,9 +4,10 @@ declare type DataSet = {
 	vec: string;
 	z: null | string;
 	complement: null | string;
+	inversion: null | string;
 };
 
-declare type Props = "number" | "primeForm" | "vec" | "z" | "complement";
+declare type Props = "number" | "primeForm" | "vec" | "z" | "complement" | "inversion";
 
 declare type FlatData = { [key: string]: (null | string)[] };
 
@@ -20,3 +21,7 @@ declare type Dag = {
 	links: { source: string; target: string; points: number[][]; data: Links };
 	v: number;
 };
+
+declare type StrObj = { [key: string]: string };
+
+declare type FilterOptions = { formatArrToString?: boolean; vecInequality?: string };

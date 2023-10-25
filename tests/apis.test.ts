@@ -32,7 +32,7 @@ const readFiles = () => {
 const setSetClasses = () => {
 	const data = fs.readFileSync("./data/set_classes.json", "utf8");
 	dataCache = JSON.parse(data);
-	flatData["prop"] = ["number", "primeForm", "vec", "z", "complement"];
+	flatData["prop"] = ["number", "primeForm", "vec", "z", "complement", "inversion"];
 	flatData.prop.forEach(prop => {
 		flatData[prop as Props] = dataCache.map(e => e[prop as Props]);
 	});

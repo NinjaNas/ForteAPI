@@ -55,7 +55,7 @@ const readFiles = () => {
 const setSetClasses = () => {
 	const data = fs.readFileSync("./data/set_classes.json", "utf8");
 	dataCache = JSON.parse(data);
-	flatData["prop"] = ["number", "primeForm", "vec", "z", "complement"];
+	flatData["prop"] = ["number", "primeForm", "vec", "z", "complement", "inversion"];
 	flatData.prop.forEach(prop => {
 		flatData[prop as Props] = dataCache.map(e => e[prop as Props]);
 	});
@@ -70,18 +70,89 @@ const setD3 = (connectionType: string, jsonType: string, textType: string) => {
 	d3Data[connectionType + jsonType + textType] = JSON.parse(data);
 };
 
-const filterFunc = (q: string, prop: string) => {
-	if (q === "null") {
-		return (e: { [key: string]: string }) => e[prop] === null;
-	} else if (q.at(0) === "^" && q.at(-1) === "$") {
-		return (e: { [key: string]: string }) => e[prop] === q.slice(1, q.length - 1);
-	} else if (q.at(0) === "^") {
-		return (e: { [key: string]: string }) => e[prop] && e[prop].startsWith(q.slice(1));
-	} else if (q.at(-1) === "$") {
-		return (e: { [key: string]: string }) => e[prop] && e[prop].endsWith(q.slice(0, q.length - 1));
-	} else {
-		return (e: { [key: string]: string }) => e[prop] === q;
-	}
+// formatArrToString should be used for primeForm and inversion
+const filterFunc = (
+	q: string,
+	prop: string,
+	options: FilterOptions = { formatArrToString: false, vecInequality: "e" }
+) => {
+	const { formatArrToString = false, vecInequality = "e" } = options;
+	q = q.replace(/ /g, "");
+
+	const isNotFlag = q.startsWith("!");
+	if (isNotFlag) q = q.slice(1);
+
+	const formatString = (s: string) => {
+		return s.replace(/T/g, "10").replace(/E/g, "11").replace(/C/g, "12");
+	};
+
+	const filterInequality = (leftStr: string, rightStr: string) => {
+		const left = parseInt(formatString(leftStr));
+		const right = parseInt(formatString(rightStr));
+
+		if ((!left && left !== 0) || (!right && right !== 0)) {
+			return false;
+		}
+
+		switch (vecInequality) {
+			case "g":
+				return left > right;
+			case "l":
+				return left < right;
+			case "ge":
+				return left >= right;
+			case "le":
+				return left <= right;
+			case "e":
+				return left === right;
+			default:
+				return false;
+		}
+	};
+
+	const conditionFunc = (() => {
+		switch (true) {
+			case q === "null":
+				return (e: StrObj) => e[prop] === null;
+			case q.startsWith("^"):
+				return (e: StrObj) =>
+					e[prop] &&
+					(formatArrToString ? e[prop].replace(/(?![TEC])\D/g, "") : e[prop]).startsWith(
+						q.slice(1)
+					);
+			case q.endsWith("$"):
+				return (e: StrObj) =>
+					e[prop] &&
+					(formatArrToString ? e[prop].replace(/(?![TEC])\D/g, "") : e[prop]).endsWith(
+						q.slice(0, -1)
+					);
+			case q.startsWith("@"):
+				return (e: StrObj) =>
+					q
+						.slice(1)
+						.split("")
+						.every(
+							c =>
+								e[prop] &&
+								(formatArrToString ? e[prop].replace(/(?![TEC])\D/g, "") : e[prop]).includes(c)
+						);
+			case prop === "vec" && q.length === 6:
+				// for vec examples: 111111, 1XXXXX, !111111, !1XXXXX
+				// note that ! is removed beforehand
+				return (e: StrObj) =>
+					q
+						.split("")
+						.every(
+							(c, i) =>
+								c === "X" || filterInequality(e[prop].replace(/(?![TEC])\D/g, "").charAt(i), c)
+						);
+			default:
+				return (e: StrObj) =>
+					e[prop] && (formatArrToString ? e[prop].replace(/(?![TEC])\D/g, "") : e[prop]) === q;
+		}
+	})();
+
+	return (e: StrObj) => (isNotFlag ? !conditionFunc(e) : conditionFunc(e));
 };
 
 readFiles();
@@ -98,15 +169,15 @@ app.get("/api/data/:prop/", (req, res) => {
 	const tempDataCache = structuredClone(dataCache);
 
 	const { prop } = req.params;
-	if (prop.length > 33) return res.status(414).send("URI Too Long: 33 characters or less");
+	if (prop.length > 100) return res.status(414).send("URI Too Long: 100 characters or less");
 
-	const propSplit = prop.split(",");
-
-	for (const p of propSplit) {
+	for (const p of prop.split(",")) {
+		if (p.length < 1 || p.length > 10)
+			return res.status(400).send("Bad Request: Subqueries Must Be 1-10 Characters Long");
 		if (!flatData.prop.includes(p)) return res.status(400).send("Bad Request: Incorrect Property");
 	}
 
-	const propsToRemove = flatData.prop.filter(p => !propSplit.includes(p));
+	const propsToRemove = flatData.prop.filter(p => !prop.split(",").includes(p));
 
 	for (const d of tempDataCache) {
 		for (const p of propsToRemove) {
@@ -121,12 +192,14 @@ app.get("/api/flatdata/:prop/", (req, res) => {
 	if (!dataCache) return res.sendStatus(500);
 
 	const { prop } = req.params;
+	if (prop.length > 10) return res.status(414).send("URI Too Long: 10 characters or less");
+
 	if (!flatData.prop.includes(prop)) return res.status(400).send("Bad Request: Incorrect Property");
 
 	res.status(200).send(flatData[prop]);
 });
 
-// query = 1-1 || ^1 || A$ || 2-1~3-1 (inclusive) || 1-1,2-1 || 2-1~3-1,1-1,^7,15A$
+// query = 1-1 || ^1 || A$ || 2-1~3-1 (inclusive) || 1-1,2-1 || 2-1~3-1,1-1,^7,15A$ || !1-1,!2-1
 app.get("/api/data/number/:query", (req, res) => {
 	if (!dataCache) return res.sendStatus(500);
 
@@ -137,6 +210,8 @@ app.get("/api/data/number/:query", (req, res) => {
 	const uniqueResults = new Set<string>();
 
 	for (const q of query.split(",")) {
+		if (q.length < 2 || q.length > 15)
+			return res.status(400).send("Bad Request: Subqueries Must Be 2-15 Characters Long");
 		const rangeStr = q.split("~");
 		if (rangeStr.length === 2) {
 			// reduce to find the indexes that match the rangeStr
@@ -168,21 +243,27 @@ app.get("/api/data/number/:query", (req, res) => {
 	res.status(200).send(filteredData);
 });
 
-// query = [0,1,2,3] || 0123 (fuzzy)
+// query = 0123, 01234
 app.get("/api/data/primeForm/:query", (req, res) => {
 	if (!dataCache) return res.sendStatus(500);
 
 	const prop = "primeForm";
 	const { query } = req.params;
-	if (query.length > 25) return res.status(414).send("URI Too Long: 25 characters or less");
+	if (query.length > 100) return res.status(414).send("URI Too Long: 100 characters or less");
 
-	const filteredData: DataSet[] =
-		query.at(0) === "[" && query.at(-1) === "]"
-			? dataCache.filter(e => e[prop] === JSON.stringify(query.slice(1, -1).split(",")))
-			: dataCache.filter(
-					e =>
-						!query.includes(",") && query.split("").every(val => JSON.parse(e[prop]).includes(val))
-			  );
+	const uniqueResults = new Set<string>();
+
+	for (const q of query.split(",")) {
+		if (q.length < 1 || q.length > 14)
+			return res.status(400).send("Bad Request: Subqueries Must Be 1-14 Characters Long");
+		// filter based on queries, then add to set as a string
+		dataCache
+			.filter(filterFunc(q, prop, { formatArrToString: true }))
+			.forEach(item => uniqueResults.add(JSON.stringify(item)));
+	}
+
+	// spread set into an array then convert back to JSON
+	const filteredData: DataSet[] = [...uniqueResults].map(itemStr => JSON.parse(itemStr));
 
 	if (!filteredData.length)
 		return res.status(400).send("Bad Request: Incorrect Query or Query Not Found");
@@ -190,22 +271,27 @@ app.get("/api/data/primeForm/:query", (req, res) => {
 	res.status(200).send(filteredData);
 });
 
-// query = <1,1,1,1,1,1> || 111111 || 1X1X1X
+// query = 111111 || 1X1X1X, 210000
 app.get("/api/data/vec/:query", (req, res) => {
 	if (!dataCache) return res.sendStatus(500);
 
 	const prop = "vec";
 	const { query } = req.params;
-	if (query.length > 13) return res.status(414).send("URI Too Long: 13 characters or less");
+	if (query.length > 100) return res.status(414).send("URI Too Long: 100 characters or less");
 
-	const filteredData: DataSet[] =
-		query.at(0) === "<" && query.at(-1) === ">"
-			? dataCache.filter(e => e[prop] === query)
-			: dataCache.filter(
-					e =>
-						query.length === 6 &&
-						query.split("").every((val, i) => val === "X" || e[prop].charAt(1 + 2 * i) === val) // <1,1,1,1,1,1> vs 111111
-			  );
+	const uniqueResults = new Set<string>();
+
+	for (const q of query.split(",")) {
+		if (q.length < 2 || q.length > 8)
+			return res.status(400).send("Bad Request: Subqueries Must Be 2-8 Characters Long");
+		// filter based on queries, then add to set as a string
+		dataCache
+			.filter(filterFunc(q, prop, { formatArrToString: true }))
+			.forEach(item => uniqueResults.add(JSON.stringify(item)));
+	}
+
+	// spread set into an array then convert back to JSON
+	const filteredData: DataSet[] = [...uniqueResults].map(itemStr => JSON.parse(itemStr));
 
 	if (!filteredData.length)
 		return res.status(400).send("Bad Request: Incorrect Query or Query Not Found");
@@ -213,67 +299,30 @@ app.get("/api/data/vec/:query", (req, res) => {
 	res.status(200).send(filteredData);
 });
 
-// querySearch = <1,1,1,1,1,1> || 111111 || 1X1X1X / queryInequality = g || l || ge || le
+// querySearch = 111111 || 1X1X1X, 210000 / queryInequality = g || l || ge || le
 app.get("/api/data/vec/:querySearch/:queryInequality", (req, res) => {
 	if (!dataCache) return res.sendStatus(500);
 
 	const prop = "vec";
 	const { querySearch, queryInequality } = req.params;
-	if (querySearch.length > 13)
-		return res.status(414).send("URI Too Long (search query): 13 characters or less");
+	if (querySearch.length > 100)
+		return res.status(414).send("URI Too Long (Search Query): 100 characters or less");
 	if (queryInequality.length > 2)
-		return res.status(414).send("URI Too Long (inequality query): 2 characters or less");
+		return res.status(414).send("URI Too Long (Inequality Query): 2 characters or less");
 
-	const formatVec = (s: string) => {
-		return s.replace(/T/g, "10").replace(/C/g, "12");
-	};
+	const uniqueResults = new Set<string>();
 
-	const filterInequality = (leftStr: string, rightStr: string) => {
-		const left = parseInt(leftStr);
-		const right = parseInt(rightStr);
+	for (const q of querySearch.split(",")) {
+		if (q.length < 2 || q.length > 8)
+			return res.status(400).send("Bad Request: Subqueries Must Be 2-8 Characters Long");
+		// filter based on queries, then add to set as a string
+		dataCache
+			.filter(filterFunc(q, prop, { formatArrToString: true, vecInequality: queryInequality }))
+			.forEach(item => uniqueResults.add(JSON.stringify(item)));
+	}
 
-		if ((!left && left !== 0) || (!right && right !== 0)) {
-			return false;
-		}
-
-		switch (queryInequality) {
-			case "g":
-				return left > right;
-			case "l":
-				return left < right;
-			case "ge":
-				return left >= right;
-			case "le":
-				return left <= right;
-			default:
-				return false;
-		}
-	};
-
-	const exactSearch = () => {
-		return dataCache.filter(e =>
-			querySearch
-				.replace(/[<>]/g, "")
-				.split(",")
-				.every((val, i) => filterInequality(formatVec(e[prop].charAt(1 + 2 * i)), formatVec(val)))
-		);
-	};
-
-	const fuzzySearch = () => {
-		return dataCache.filter(
-			e =>
-				querySearch.length === 6 &&
-				querySearch
-					.split("")
-					.every(
-						(val, i) =>
-							val === "X" || filterInequality(formatVec(e[prop].charAt(1 + 2 * i)), formatVec(val))
-					)
-		);
-	};
-
-	const filteredData: DataSet[] =
-		querySearch.at(0) === "<" && querySearch.at(-1) === ">" ? exactSearch() : fuzzySearch();
+	// spread set into an array then convert back to JSON
+	const filteredData: DataSet[] = [...uniqueResults].map(itemStr => JSON.parse(itemStr));
 
 	if (!filteredData.length)
 		return res.status(400).send("Bad Request: Incorrect Query or Query Not Found"); // can be due to bad inequality query
@@ -281,46 +330,78 @@ app.get("/api/data/vec/:querySearch/:queryInequality", (req, res) => {
 	res.status(200).send(filteredData);
 });
 
-// query = null || 4-z29A || ^4 || A$
+// query = null || 4-z29A || ^4 || A$ || 4-z29A, 4-z29B, !1-1
 app.get("/api/data/z/:query", (req, res) => {
 	if (!dataCache) return res.sendStatus(500);
 
 	const prop = "z";
 	const { query } = req.params;
-	if (query.length > 8) return res.status(414).send("URI Too Long: 8 characters or less");
+	if (query.length > 100) return res.status(414).send("URI Too Long: 100 characters or less");
 
 	const uniqueResults = new Set<string>();
 
 	for (const q of query.split(",")) {
+		if (q.length < 2 || q.length > 8)
+			return res.status(400).send("Bad Request: Subqueries Must Be 2-8 Characters Long");
 		// filter based on queries, then add to set as a string
 		dataCache.filter(filterFunc(q, prop)).forEach(item => uniqueResults.add(JSON.stringify(item)));
 	}
 
 	// spread set into an array then convert back to JSON
 	const filteredData: DataSet[] = [...uniqueResults].map(itemStr => JSON.parse(itemStr));
+
 	if (!filteredData.length)
 		return res.status(400).send("Bad Request: Incorrect Query or Query Not Found");
 
 	res.status(200).send(filteredData);
 });
 
-// query = null || 4-z29A || ^4 || A$
+// query = null || 4-z29A || ^4 || A$ || 4-z29A, 4-z29B, !1-1
 app.get("/api/data/complement/:query", (req, res) => {
 	if (!dataCache) return res.sendStatus(500);
 
 	const prop = "complement";
 	const { query } = req.params;
-	if (query.length > 8) return res.status(414).send("URI Too Long: 8 characters or less");
+	if (query.length > 100) return res.status(414).send("URI Too Long: 100 characters or less");
 
 	const uniqueResults = new Set<string>();
 
 	for (const q of query.split(",")) {
+		if (q.length < 2 || q.length > 8)
+			return res.status(400).send("Bad Request: Subqueries Must Be 2-8 Characters Long");
 		// filter based on queries, then add to set as a string
 		dataCache.filter(filterFunc(q, prop)).forEach(item => uniqueResults.add(JSON.stringify(item)));
 	}
 
 	// spread set into an array then convert back to JSON
 	const filteredData: DataSet[] = [...uniqueResults].map(itemStr => JSON.parse(itemStr));
+
+	if (!filteredData.length)
+		return res.status(400).send("Bad Request: Incorrect Query or Query Not Found");
+
+	res.status(200).send(filteredData);
+});
+
+// query = null, 0123, 01234
+app.get("/api/data/inversion/:query", (req, res) => {
+	if (!dataCache) return res.sendStatus(500);
+
+	const prop = "inversion";
+	const { query } = req.params;
+	if (query.length > 100) return res.status(414).send("URI Too Long: 100 characters or less");
+
+	const uniqueResults = new Set<string>();
+
+	for (const q of query.split(",")) {
+		if (q.length < 2 || q.length > 14)
+			return res.status(400).send("Bad Request: Subqueries Must Be 2-14 Characters Long");
+		// filter based on queries, then add to set as a string
+		dataCache.filter(filterFunc(q, prop)).forEach(item => uniqueResults.add(JSON.stringify(item)));
+	}
+
+	// spread set into an array then convert back to JSON
+	const filteredData: DataSet[] = [...uniqueResults].map(itemStr => JSON.parse(itemStr));
+
 	if (!filteredData.length)
 		return res.status(400).send("Bad Request: Incorrect Query or Query Not Found");
 
