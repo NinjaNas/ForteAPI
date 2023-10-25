@@ -25,3 +25,5 @@ declare type Dag = {
 declare type StrObj = { [key: string]: string };
 
 declare type FilterOptions = { formatArrToString?: boolean; vecInequality?: string };
+
+declare type HashMap = { [key: string]: null | string };
