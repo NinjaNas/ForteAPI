@@ -39,7 +39,6 @@ const setSetClasses = () => {
 };
 
 const setD3 = (connectionType: string, jsonType: string, textType: string) => {
-	// dagData["cardinaldagprime"] = JSON.parse(data);
 	const data = fs.readFileSync(
 		`./data/d3/${connectionType}-increasing/${jsonType}s/${textType}.json`,
 		"utf8"
