@@ -22,7 +22,7 @@ declare type Dag = {
 	v: number;
 };
 
-declare type StrObj = { [key: string]: string };
+declare type StrObj = { [key: string]: null | string };
 
 declare type FilterOptions = { formatArrToString?: boolean; vecInequality?: string };
 
