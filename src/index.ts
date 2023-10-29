@@ -259,13 +259,13 @@ app.get("/api/data/number/:querySearch", (req, res) => {
 					dataCache
 						.filter(e => !dataCache.slice(range[0], range[1] + 1).includes(e))
 						.forEach(item => uniqueResults.add(JSON.stringify(item)));
+					dataCache
+						.filter(e => dataCache.slice(range[0], range[1] + 1).includes(e))
+						.forEach(item => globalNotFilter.push(JSON.stringify(item)));
 				} else {
 					dataCache
 						.slice(range[0], range[1] + 1)
 						.forEach(item => uniqueResults.add(JSON.stringify(item)));
-					dataCache
-						.filter(e => !dataCache.slice(range[0], range[1] + 1).includes(e))
-						.forEach(item => globalNotFilter.push(JSON.stringify(item)));
 				}
 			} else {
 				return res.status(400).send("Bad Request: Incorrect Query or Query Not Found");
@@ -328,14 +328,14 @@ app.get("/api/data/:queryProp/number/:querySearch", (req, res) => {
 					dataCache
 						.filter(e => !dataCache.slice(range[0], range[1] + 1).includes(e))
 						.forEach(item => uniqueResults.add(JSON.stringify(item)));
+
+					dataCache
+						.filter(e => dataCache.slice(range[0], range[1] + 1).includes(e))
+						.forEach(item => globalNotFilter.push(JSON.stringify(item)));
 				} else {
 					dataCache
 						.slice(range[0], range[1] + 1)
 						.forEach(item => uniqueResults.add(JSON.stringify(item)));
-
-					dataCache
-						.filter(e => !dataCache.slice(range[0], range[1] + 1).includes(e))
-						.forEach(item => globalNotFilter.push(JSON.stringify(item)));
 				}
 			} else {
 				return res.status(400).send("Bad Request: Incorrect Query or Query Not Found");
@@ -405,8 +405,6 @@ app.get("/api/data/primeForm/:querySearch", (req, res) => {
 app.get("/api/data/:queryProp/primeForm/:querySearch", (req, res) => {
 	if (!dataCache) return res.sendStatus(500);
 
-	const tempDataCache = structuredClone(dataCache);
-
 	const { queryProp } = req.params;
 	if (queryProp.length > 100) return res.status(414).send("URI Too Long: 100 characters or less");
 
@@ -426,7 +424,7 @@ app.get("/api/data/:queryProp/primeForm/:querySearch", (req, res) => {
 		if (q.length < 1 || q.length > 14)
 			return res.status(400).send("Bad Request: Subqueries Must Be 1-14 Characters Long");
 		// filter based on queries, then add to set as a string
-		tempDataCache
+		dataCache
 			.filter(filterFunc(q, prop, { formatArrToString: true }))
 			.forEach(item => uniqueResults.add(JSON.stringify(item)));
 	}
@@ -488,8 +486,6 @@ app.get("/api/data/vec/:querySearch", (req, res) => {
 app.get("/api/data/:queryProp/vec/:querySearch", (req, res) => {
 	if (!dataCache) return res.sendStatus(500);
 
-	const tempDataCache = structuredClone(dataCache);
-
 	const { queryProp } = req.params;
 	if (queryProp.length > 100) return res.status(414).send("URI Too Long: 100 characters or less");
 
@@ -509,7 +505,7 @@ app.get("/api/data/:queryProp/vec/:querySearch", (req, res) => {
 		if (q.length < 2 || q.length > 8)
 			return res.status(400).send("Bad Request: Subqueries Must Be 2-8 Characters Long");
 		// filter based on queries, then add to set as a string
-		tempDataCache
+		dataCache
 			.filter(filterFunc(q, prop, { formatArrToString: true }))
 			.forEach(item => uniqueResults.add(JSON.stringify(item)));
 	}
@@ -574,8 +570,6 @@ app.get("/api/data/vec/:querySearch/:queryInequality", (req, res) => {
 app.get("/api/data/:queryProp/vec/:querySearch/:queryInequality", (req, res) => {
 	if (!dataCache) return res.sendStatus(500);
 
-	const tempDataCache = structuredClone(dataCache);
-
 	const { queryProp } = req.params;
 	if (queryProp.length > 100) return res.status(414).send("URI Too Long: 100 characters or less");
 
@@ -598,7 +592,7 @@ app.get("/api/data/:queryProp/vec/:querySearch/:queryInequality", (req, res) => 
 		if (q.length < 2 || q.length > 8)
 			return res.status(400).send("Bad Request: Subqueries Must Be 2-8 Characters Long");
 		// filter based on queries, then add to set as a string
-		tempDataCache
+		dataCache
 			.filter(filterFunc(q, prop, { formatArrToString: true, vecInequality: queryInequality }))
 			.forEach(item => uniqueResults.add(JSON.stringify(item)));
 	}
@@ -658,8 +652,6 @@ app.get("/api/data/z/:querySearch", (req, res) => {
 app.get("/api/data/:queryProp/z/:querySearch", (req, res) => {
 	if (!dataCache) return res.sendStatus(500);
 
-	const tempDataCache = structuredClone(dataCache);
-
 	const { queryProp } = req.params;
 	if (queryProp.length > 100) return res.status(414).send("URI Too Long: 100 characters or less");
 
@@ -679,9 +671,7 @@ app.get("/api/data/:queryProp/z/:querySearch", (req, res) => {
 		if (q.length < 2 || q.length > 8)
 			return res.status(400).send("Bad Request: Subqueries Must Be 2-8 Characters Long");
 		// filter based on queries, then add to set as a string
-		tempDataCache
-			.filter(filterFunc(q, prop))
-			.forEach(item => uniqueResults.add(JSON.stringify(item)));
+		dataCache.filter(filterFunc(q, prop)).forEach(item => uniqueResults.add(JSON.stringify(item)));
 	}
 
 	// spread set into an array then convert back to JSON
@@ -739,8 +729,6 @@ app.get("/api/data/complement/:querySearch", (req, res) => {
 app.get("/api/data/:queryProp/complement/:querySearch", (req, res) => {
 	if (!dataCache) return res.sendStatus(500);
 
-	const tempDataCache = structuredClone(dataCache);
-
 	const { queryProp } = req.params;
 	if (queryProp.length > 100) return res.status(414).send("URI Too Long: 100 characters or less");
 
@@ -760,9 +748,7 @@ app.get("/api/data/:queryProp/complement/:querySearch", (req, res) => {
 		if (q.length < 2 || q.length > 8)
 			return res.status(400).send("Bad Request: Subqueries Must Be 2-8 Characters Long");
 		// filter based on queries, then add to set as a string
-		tempDataCache
-			.filter(filterFunc(q, prop))
-			.forEach(item => uniqueResults.add(JSON.stringify(item)));
+		dataCache.filter(filterFunc(q, prop)).forEach(item => uniqueResults.add(JSON.stringify(item)));
 	}
 
 	// spread set into an array then convert back to JSON
@@ -800,7 +786,9 @@ app.get("/api/data/inversion/:querySearch", (req, res) => {
 		if (q.length < 2 || q.length > 14)
 			return res.status(400).send("Bad Request: Subqueries Must Be 2-14 Characters Long");
 		// filter based on queries, then add to set as a string
-		dataCache.filter(filterFunc(q, prop)).forEach(item => uniqueResults.add(JSON.stringify(item)));
+		dataCache
+			.filter(filterFunc(q, prop, { formatArrToString: true }))
+			.forEach(item => uniqueResults.add(JSON.stringify(item)));
 	}
 
 	// spread set into an array then convert back to JSON
@@ -819,8 +807,6 @@ app.get("/api/data/inversion/:querySearch", (req, res) => {
 // query = null, 0123, 01234
 app.get("/api/data/:queryProp/inversion/:querySearch", (req, res) => {
 	if (!dataCache) return res.sendStatus(500);
-
-	const tempDataCache = structuredClone(dataCache);
 
 	const { queryProp } = req.params;
 	if (queryProp.length > 100) return res.status(414).send("URI Too Long: 100 characters or less");
@@ -841,8 +827,8 @@ app.get("/api/data/:queryProp/inversion/:querySearch", (req, res) => {
 		if (q.length < 2 || q.length > 14)
 			return res.status(400).send("Bad Request: Subqueries Must Be 2-14 Characters Long");
 		// filter based on queries, then add to set as a string
-		tempDataCache
-			.filter(filterFunc(q, prop))
+		dataCache
+			.filter(filterFunc(q, prop, { formatArrToString: true }))
 			.forEach(item => uniqueResults.add(JSON.stringify(item)));
 	}
 
