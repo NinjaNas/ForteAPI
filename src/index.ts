@@ -30,7 +30,7 @@ const limiter = rateLimit({
 app.use(limiter);
 
 let dataCache: DataSet[];
-let globalNotFilter: string[] = [];
+let globalFilter: string[] = [];
 
 const flatData: FlatData = {};
 const d3Data: D3Data = {};
@@ -81,6 +81,9 @@ const filterFunc = (
 
 	const isNotFlag = q.startsWith("!");
 	if (isNotFlag) q = q.slice(1);
+
+	const isExcludeFlag = q.startsWith("#");
+	if (isExcludeFlag) q = q.slice(1);
 
 	const formatString = (s: string) => {
 		return s.replace(/T/g, "10").replace(/E/g, "11").replace(/C/g, "12");
@@ -155,9 +158,16 @@ const filterFunc = (
 	return (e: StrObj) => {
 		const res = conditionFunc(e);
 
+		// if res is true add to global
+
+		if (isExcludeFlag && res) {
+			globalFilter.push(JSON.stringify(e));
+			return false;
+		}
+
 		// add a flag to filter out duplicates later, if they are readded in another query
 		if (isNotFlag && res) {
-			globalNotFilter.push(JSON.stringify(e));
+			globalFilter.push(JSON.stringify(e));
 		}
 
 		return isNotFlag ? !res : res;
@@ -248,6 +258,8 @@ app.get("/api/data/number/:querySearch", (req, res) => {
 		if (rangeStr.length === 2) {
 			const isNotFlag = rangeStr[0].startsWith("!");
 			if (isNotFlag) rangeStr[0] = rangeStr[0].slice(1);
+			const isExcludeFlag = rangeStr[0].startsWith("#");
+			if (isExcludeFlag) rangeStr[0] = rangeStr[0].slice(1);
 			// reduce to find the indexes that match the rangeStr
 			const range: number[] = dataCache.reduce(
 				(acc, e, i) => (e[prop] === rangeStr[0] || e[prop] === rangeStr[1] ? acc.concat(i) : acc),
@@ -255,13 +267,17 @@ app.get("/api/data/number/:querySearch", (req, res) => {
 			);
 			if (range.length === 2) {
 				// slice by range, then add to set as a string
-				if (isNotFlag) {
+				if (isExcludeFlag) {
+					dataCache
+						.filter(e => dataCache.slice(range[0], range[1] + 1).includes(e))
+						.forEach(item => globalFilter.push(JSON.stringify(item)));
+				} else if (isNotFlag) {
 					dataCache
 						.filter(e => !dataCache.slice(range[0], range[1] + 1).includes(e))
 						.forEach(item => uniqueResults.add(JSON.stringify(item)));
 					dataCache
 						.filter(e => dataCache.slice(range[0], range[1] + 1).includes(e))
-						.forEach(item => globalNotFilter.push(JSON.stringify(item)));
+						.forEach(item => globalFilter.push(JSON.stringify(item)));
 				} else {
 					dataCache
 						.slice(range[0], range[1] + 1)
@@ -280,13 +296,13 @@ app.get("/api/data/number/:querySearch", (req, res) => {
 
 	// spread set into an array then convert back to JSON
 	const filteredData: DataSet[] = [...uniqueResults]
-		.filter(e => !globalNotFilter.includes(e))
+		.filter(e => !globalFilter.includes(e))
 		.map(itemStr => JSON.parse(itemStr));
 
 	if (!filteredData.length)
 		return res.status(400).send("Bad Request: Incorrect Query or Query Not Found");
 
-	globalNotFilter = [];
+	globalFilter = [];
 
 	res.status(200).send(filteredData);
 });
@@ -317,6 +333,8 @@ app.get("/api/data/:queryProp/number/:querySearch", (req, res) => {
 		if (rangeStr.length === 2) {
 			const isNotFlag = rangeStr[0].startsWith("!");
 			if (isNotFlag) rangeStr[0] = rangeStr[0].slice(1);
+			const isExcludeFlag = rangeStr[0].startsWith("#");
+			if (isExcludeFlag) rangeStr[0] = rangeStr[0].slice(1);
 			// reduce to find the indexes that match the rangeStr
 			const range: number[] = dataCache.reduce(
 				(acc, e, i) => (e[prop] === rangeStr[0] || e[prop] === rangeStr[1] ? acc.concat(i) : acc),
@@ -324,14 +342,17 @@ app.get("/api/data/:queryProp/number/:querySearch", (req, res) => {
 			);
 			if (range.length === 2) {
 				// slice by range, then add to set as a string
-				if (isNotFlag) {
+				if (isExcludeFlag) {
+					dataCache
+						.filter(e => dataCache.slice(range[0], range[1] + 1).includes(e))
+						.forEach(item => globalFilter.push(JSON.stringify(item)));
+				} else if (isNotFlag) {
 					dataCache
 						.filter(e => !dataCache.slice(range[0], range[1] + 1).includes(e))
 						.forEach(item => uniqueResults.add(JSON.stringify(item)));
-
 					dataCache
 						.filter(e => dataCache.slice(range[0], range[1] + 1).includes(e))
-						.forEach(item => globalNotFilter.push(JSON.stringify(item)));
+						.forEach(item => globalFilter.push(JSON.stringify(item)));
 				} else {
 					dataCache
 						.slice(range[0], range[1] + 1)
@@ -350,7 +371,7 @@ app.get("/api/data/:queryProp/number/:querySearch", (req, res) => {
 
 	// spread set into an array then convert back to JSON
 	const filteredData: DataSet[] = [...uniqueResults]
-		.filter(e => !globalNotFilter.includes(e))
+		.filter(e => !globalFilter.includes(e))
 		.map(itemStr => JSON.parse(itemStr));
 
 	if (!filteredData.length)
@@ -364,7 +385,7 @@ app.get("/api/data/:queryProp/number/:querySearch", (req, res) => {
 		}
 	}
 
-	globalNotFilter = [];
+	globalFilter = [];
 
 	res.status(200).send(filteredData);
 });
@@ -390,13 +411,13 @@ app.get("/api/data/primeForm/:querySearch", (req, res) => {
 
 	// spread set into an array then convert back to JSON
 	const filteredData: DataSet[] = [...uniqueResults]
-		.filter(e => !globalNotFilter.includes(e))
+		.filter(e => !globalFilter.includes(e))
 		.map(itemStr => JSON.parse(itemStr));
 
 	if (!filteredData.length)
 		return res.status(400).send("Bad Request: Incorrect Query or Query Not Found");
 
-	globalNotFilter = [];
+	globalFilter = [];
 
 	res.status(200).send(filteredData);
 });
@@ -431,7 +452,7 @@ app.get("/api/data/:queryProp/primeForm/:querySearch", (req, res) => {
 
 	// spread set into an array then convert back to JSON
 	const filteredData: DataSet[] = [...uniqueResults]
-		.filter(e => !globalNotFilter.includes(e))
+		.filter(e => !globalFilter.includes(e))
 		.map(itemStr => JSON.parse(itemStr));
 
 	if (!filteredData.length)
@@ -445,7 +466,7 @@ app.get("/api/data/:queryProp/primeForm/:querySearch", (req, res) => {
 		}
 	}
 
-	globalNotFilter = [];
+	globalFilter = [];
 
 	res.status(200).send(filteredData);
 });
@@ -471,13 +492,13 @@ app.get("/api/data/vec/:querySearch", (req, res) => {
 
 	// spread set into an array then convert back to JSON
 	const filteredData: DataSet[] = [...uniqueResults]
-		.filter(e => !globalNotFilter.includes(e))
+		.filter(e => !globalFilter.includes(e))
 		.map(itemStr => JSON.parse(itemStr));
 
 	if (!filteredData.length)
 		return res.status(400).send("Bad Request: Incorrect Query or Query Not Found");
 
-	globalNotFilter = [];
+	globalFilter = [];
 
 	res.status(200).send(filteredData);
 });
@@ -512,7 +533,7 @@ app.get("/api/data/:queryProp/vec/:querySearch", (req, res) => {
 
 	// spread set into an array then convert back to JSON
 	const filteredData: DataSet[] = [...uniqueResults]
-		.filter(e => !globalNotFilter.includes(e))
+		.filter(e => !globalFilter.includes(e))
 		.map(itemStr => JSON.parse(itemStr));
 
 	if (!filteredData.length)
@@ -526,7 +547,7 @@ app.get("/api/data/:queryProp/vec/:querySearch", (req, res) => {
 		}
 	}
 
-	globalNotFilter = [];
+	globalFilter = [];
 
 	res.status(200).send(filteredData);
 });
@@ -555,13 +576,13 @@ app.get("/api/data/vec/:querySearch/:queryInequality", (req, res) => {
 
 	// spread set into an array then convert back to JSON
 	const filteredData: DataSet[] = [...uniqueResults]
-		.filter(e => !globalNotFilter.includes(e))
+		.filter(e => !globalFilter.includes(e))
 		.map(itemStr => JSON.parse(itemStr));
 
 	if (!filteredData.length)
 		return res.status(400).send("Bad Request: Incorrect Query or Query Not Found"); // can be due to bad inequality query
 
-	globalNotFilter = [];
+	globalFilter = [];
 
 	res.status(200).send(filteredData);
 });
@@ -599,7 +620,7 @@ app.get("/api/data/:queryProp/vec/:querySearch/:queryInequality", (req, res) => 
 
 	// spread set into an array then convert back to JSON
 	const filteredData: DataSet[] = [...uniqueResults]
-		.filter(e => !globalNotFilter.includes(e))
+		.filter(e => !globalFilter.includes(e))
 		.map(itemStr => JSON.parse(itemStr));
 
 	if (!filteredData.length)
@@ -613,7 +634,7 @@ app.get("/api/data/:queryProp/vec/:querySearch/:queryInequality", (req, res) => 
 		}
 	}
 
-	globalNotFilter = [];
+	globalFilter = [];
 
 	res.status(200).send(filteredData);
 });
@@ -637,13 +658,13 @@ app.get("/api/data/z/:querySearch", (req, res) => {
 
 	// spread set into an array then convert back to JSON
 	const filteredData: DataSet[] = [...uniqueResults]
-		.filter(e => !globalNotFilter.includes(e))
+		.filter(e => !globalFilter.includes(e))
 		.map(itemStr => JSON.parse(itemStr));
 
 	if (!filteredData.length)
 		return res.status(400).send("Bad Request: Incorrect Query or Query Not Found");
 
-	globalNotFilter = [];
+	globalFilter = [];
 
 	res.status(200).send(filteredData);
 });
@@ -676,7 +697,7 @@ app.get("/api/data/:queryProp/z/:querySearch", (req, res) => {
 
 	// spread set into an array then convert back to JSON
 	const filteredData: DataSet[] = [...uniqueResults]
-		.filter(e => !globalNotFilter.includes(e))
+		.filter(e => !globalFilter.includes(e))
 		.map(itemStr => JSON.parse(itemStr));
 
 	if (!filteredData.length)
@@ -690,7 +711,7 @@ app.get("/api/data/:queryProp/z/:querySearch", (req, res) => {
 		}
 	}
 
-	globalNotFilter = [];
+	globalFilter = [];
 
 	res.status(200).send(filteredData);
 });
@@ -714,13 +735,13 @@ app.get("/api/data/complement/:querySearch", (req, res) => {
 
 	// spread set into an array then convert back to JSON
 	const filteredData: DataSet[] = [...uniqueResults]
-		.filter(e => !globalNotFilter.includes(e))
+		.filter(e => !globalFilter.includes(e))
 		.map(itemStr => JSON.parse(itemStr));
 
 	if (!filteredData.length)
 		return res.status(400).send("Bad Request: Incorrect Query or Query Not Found");
 
-	globalNotFilter = [];
+	globalFilter = [];
 
 	res.status(200).send(filteredData);
 });
@@ -753,7 +774,7 @@ app.get("/api/data/:queryProp/complement/:querySearch", (req, res) => {
 
 	// spread set into an array then convert back to JSON
 	const filteredData: DataSet[] = [...uniqueResults]
-		.filter(e => !globalNotFilter.includes(e))
+		.filter(e => !globalFilter.includes(e))
 		.map(itemStr => JSON.parse(itemStr));
 
 	if (!filteredData.length)
@@ -767,7 +788,7 @@ app.get("/api/data/:queryProp/complement/:querySearch", (req, res) => {
 		}
 	}
 
-	globalNotFilter = [];
+	globalFilter = [];
 
 	res.status(200).send(filteredData);
 });
@@ -793,13 +814,13 @@ app.get("/api/data/inversion/:querySearch", (req, res) => {
 
 	// spread set into an array then convert back to JSON
 	const filteredData: DataSet[] = [...uniqueResults]
-		.filter(e => !globalNotFilter.includes(e))
+		.filter(e => !globalFilter.includes(e))
 		.map(itemStr => JSON.parse(itemStr));
 
 	if (!filteredData.length)
 		return res.status(400).send("Bad Request: Incorrect Query or Query Not Found");
 
-	globalNotFilter = [];
+	globalFilter = [];
 
 	res.status(200).send(filteredData);
 });
@@ -834,7 +855,7 @@ app.get("/api/data/:queryProp/inversion/:querySearch", (req, res) => {
 
 	// spread set into an array then convert back to JSON
 	const filteredData: DataSet[] = [...uniqueResults]
-		.filter(e => !globalNotFilter.includes(e))
+		.filter(e => !globalFilter.includes(e))
 		.map(itemStr => JSON.parse(itemStr));
 
 	if (!filteredData.length)
@@ -848,7 +869,7 @@ app.get("/api/data/:queryProp/inversion/:querySearch", (req, res) => {
 		}
 	}
 
-	globalNotFilter = [];
+	globalFilter = [];
 
 	res.status(200).send(filteredData);
 });
