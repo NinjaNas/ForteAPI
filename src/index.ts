@@ -82,7 +82,7 @@ const filterFunc = (
 	const isNotFlag = q.startsWith("!");
 	if (isNotFlag) q = q.slice(1);
 
-	const isExcludeFlag = q.startsWith("#");
+	const isExcludeFlag = q.startsWith("`");
 	if (isExcludeFlag) q = q.slice(1);
 
 	const formatString = (s: string) => {
@@ -258,7 +258,7 @@ app.get("/api/data/number/:querySearch", (req, res) => {
 		if (rangeStr.length === 2) {
 			const isNotFlag = rangeStr[0].startsWith("!");
 			if (isNotFlag) rangeStr[0] = rangeStr[0].slice(1);
-			const isExcludeFlag = rangeStr[0].startsWith("#");
+			const isExcludeFlag = rangeStr[0].startsWith("`");
 			if (isExcludeFlag) rangeStr[0] = rangeStr[0].slice(1);
 			// reduce to find the indexes that match the rangeStr
 			const range: number[] = dataCache.reduce(
@@ -284,6 +284,7 @@ app.get("/api/data/number/:querySearch", (req, res) => {
 						.forEach(item => uniqueResults.add(JSON.stringify(item)));
 				}
 			} else {
+				globalFilter = [];
 				return res.status(400).send("Bad Request: Incorrect Query or Query Not Found");
 			}
 		} else {
@@ -299,10 +300,10 @@ app.get("/api/data/number/:querySearch", (req, res) => {
 		.filter(e => !globalFilter.includes(e))
 		.map(itemStr => JSON.parse(itemStr));
 
+	globalFilter = [];
+
 	if (!filteredData.length)
 		return res.status(400).send("Bad Request: Incorrect Query or Query Not Found");
-
-	globalFilter = [];
 
 	res.status(200).send(filteredData);
 });
@@ -333,7 +334,7 @@ app.get("/api/data/:queryProp/number/:querySearch", (req, res) => {
 		if (rangeStr.length === 2) {
 			const isNotFlag = rangeStr[0].startsWith("!");
 			if (isNotFlag) rangeStr[0] = rangeStr[0].slice(1);
-			const isExcludeFlag = rangeStr[0].startsWith("#");
+			const isExcludeFlag = rangeStr[0].startsWith("`");
 			if (isExcludeFlag) rangeStr[0] = rangeStr[0].slice(1);
 			// reduce to find the indexes that match the rangeStr
 			const range: number[] = dataCache.reduce(
@@ -359,6 +360,7 @@ app.get("/api/data/:queryProp/number/:querySearch", (req, res) => {
 						.forEach(item => uniqueResults.add(JSON.stringify(item)));
 				}
 			} else {
+				globalFilter = [];
 				return res.status(400).send("Bad Request: Incorrect Query or Query Not Found");
 			}
 		} else {
@@ -374,6 +376,8 @@ app.get("/api/data/:queryProp/number/:querySearch", (req, res) => {
 		.filter(e => !globalFilter.includes(e))
 		.map(itemStr => JSON.parse(itemStr));
 
+	globalFilter = [];
+
 	if (!filteredData.length)
 		return res.status(400).send("Bad Request: Incorrect Query or Query Not Found");
 
@@ -384,8 +388,6 @@ app.get("/api/data/:queryProp/number/:querySearch", (req, res) => {
 			delete d[p as Props];
 		}
 	}
-
-	globalFilter = [];
 
 	res.status(200).send(filteredData);
 });
@@ -401,8 +403,10 @@ app.get("/api/data/primeForm/:querySearch", (req, res) => {
 	const uniqueResults = new Set<string>();
 
 	for (const q of querySearch.split(",")) {
-		if (q.length < 1 || q.length > 14)
+		if (q.length < 1 || q.length > 14) {
+			globalFilter = [];
 			return res.status(400).send("Bad Request: Subqueries Must Be 1-14 Characters Long");
+		}
 		// filter based on queries, then add to set as a string
 		dataCache
 			.filter(filterFunc(q, prop, { formatArrToString: true }))
@@ -414,10 +418,10 @@ app.get("/api/data/primeForm/:querySearch", (req, res) => {
 		.filter(e => !globalFilter.includes(e))
 		.map(itemStr => JSON.parse(itemStr));
 
+	globalFilter = [];
+
 	if (!filteredData.length)
 		return res.status(400).send("Bad Request: Incorrect Query or Query Not Found");
-
-	globalFilter = [];
 
 	res.status(200).send(filteredData);
 });
@@ -442,8 +446,10 @@ app.get("/api/data/:queryProp/primeForm/:querySearch", (req, res) => {
 	const uniqueResults = new Set<string>();
 
 	for (const q of querySearch.split(",")) {
-		if (q.length < 1 || q.length > 14)
+		if (q.length < 1 || q.length > 14) {
+			globalFilter = [];
 			return res.status(400).send("Bad Request: Subqueries Must Be 1-14 Characters Long");
+		}
 		// filter based on queries, then add to set as a string
 		dataCache
 			.filter(filterFunc(q, prop, { formatArrToString: true }))
@@ -455,6 +461,8 @@ app.get("/api/data/:queryProp/primeForm/:querySearch", (req, res) => {
 		.filter(e => !globalFilter.includes(e))
 		.map(itemStr => JSON.parse(itemStr));
 
+	globalFilter = [];
+
 	if (!filteredData.length)
 		return res.status(400).send("Bad Request: Incorrect Query or Query Not Found");
 
@@ -465,8 +473,6 @@ app.get("/api/data/:queryProp/primeForm/:querySearch", (req, res) => {
 			delete d[p as Props];
 		}
 	}
-
-	globalFilter = [];
 
 	res.status(200).send(filteredData);
 });
@@ -482,8 +488,10 @@ app.get("/api/data/vec/:querySearch", (req, res) => {
 	const uniqueResults = new Set<string>();
 
 	for (const q of querySearch.split(",")) {
-		if (q.length < 2 || q.length > 8)
+		if (q.length < 2 || q.length > 8) {
+			globalFilter = [];
 			return res.status(400).send("Bad Request: Subqueries Must Be 2-8 Characters Long");
+		}
 		// filter based on queries, then add to set as a string
 		dataCache
 			.filter(filterFunc(q, prop, { formatArrToString: true }))
@@ -495,10 +503,10 @@ app.get("/api/data/vec/:querySearch", (req, res) => {
 		.filter(e => !globalFilter.includes(e))
 		.map(itemStr => JSON.parse(itemStr));
 
+	globalFilter = [];
+
 	if (!filteredData.length)
 		return res.status(400).send("Bad Request: Incorrect Query or Query Not Found");
-
-	globalFilter = [];
 
 	res.status(200).send(filteredData);
 });
@@ -523,8 +531,10 @@ app.get("/api/data/:queryProp/vec/:querySearch", (req, res) => {
 	const uniqueResults = new Set<string>();
 
 	for (const q of querySearch.split(",")) {
-		if (q.length < 2 || q.length > 8)
+		if (q.length < 2 || q.length > 8) {
+			globalFilter = [];
 			return res.status(400).send("Bad Request: Subqueries Must Be 2-8 Characters Long");
+		}
 		// filter based on queries, then add to set as a string
 		dataCache
 			.filter(filterFunc(q, prop, { formatArrToString: true }))
@@ -536,6 +546,8 @@ app.get("/api/data/:queryProp/vec/:querySearch", (req, res) => {
 		.filter(e => !globalFilter.includes(e))
 		.map(itemStr => JSON.parse(itemStr));
 
+	globalFilter = [];
+
 	if (!filteredData.length)
 		return res.status(400).send("Bad Request: Incorrect Query or Query Not Found");
 
@@ -546,8 +558,6 @@ app.get("/api/data/:queryProp/vec/:querySearch", (req, res) => {
 			delete d[p as Props];
 		}
 	}
-
-	globalFilter = [];
 
 	res.status(200).send(filteredData);
 });
@@ -566,8 +576,10 @@ app.get("/api/data/vec/:querySearch/:queryInequality", (req, res) => {
 	const uniqueResults = new Set<string>();
 
 	for (const q of querySearch.split(",")) {
-		if (q.length < 2 || q.length > 8)
+		if (q.length < 2 || q.length > 8) {
+			globalFilter = [];
 			return res.status(400).send("Bad Request: Subqueries Must Be 2-8 Characters Long");
+		}
 		// filter based on queries, then add to set as a string
 		dataCache
 			.filter(filterFunc(q, prop, { formatArrToString: true, vecInequality: queryInequality }))
@@ -579,10 +591,10 @@ app.get("/api/data/vec/:querySearch/:queryInequality", (req, res) => {
 		.filter(e => !globalFilter.includes(e))
 		.map(itemStr => JSON.parse(itemStr));
 
+	globalFilter = [];
+
 	if (!filteredData.length)
 		return res.status(400).send("Bad Request: Incorrect Query or Query Not Found"); // can be due to bad inequality query
-
-	globalFilter = [];
 
 	res.status(200).send(filteredData);
 });
@@ -610,8 +622,10 @@ app.get("/api/data/:queryProp/vec/:querySearch/:queryInequality", (req, res) => 
 	const uniqueResults = new Set<string>();
 
 	for (const q of querySearch.split(",")) {
-		if (q.length < 2 || q.length > 8)
+		if (q.length < 2 || q.length > 8) {
+			globalFilter = [];
 			return res.status(400).send("Bad Request: Subqueries Must Be 2-8 Characters Long");
+		}
 		// filter based on queries, then add to set as a string
 		dataCache
 			.filter(filterFunc(q, prop, { formatArrToString: true, vecInequality: queryInequality }))
@@ -623,6 +637,8 @@ app.get("/api/data/:queryProp/vec/:querySearch/:queryInequality", (req, res) => 
 		.filter(e => !globalFilter.includes(e))
 		.map(itemStr => JSON.parse(itemStr));
 
+	globalFilter = [];
+
 	if (!filteredData.length)
 		return res.status(400).send("Bad Request: Incorrect Query or Query Not Found"); // can be due to bad inequality query
 
@@ -633,8 +649,6 @@ app.get("/api/data/:queryProp/vec/:querySearch/:queryInequality", (req, res) => 
 			delete d[p as Props];
 		}
 	}
-
-	globalFilter = [];
 
 	res.status(200).send(filteredData);
 });
@@ -650,8 +664,10 @@ app.get("/api/data/z/:querySearch", (req, res) => {
 	const uniqueResults = new Set<string>();
 
 	for (const q of querySearch.split(",")) {
-		if (q.length < 2 || q.length > 8)
+		if (q.length < 2 || q.length > 8) {
+			globalFilter = [];
 			return res.status(400).send("Bad Request: Subqueries Must Be 2-8 Characters Long");
+		}
 		// filter based on queries, then add to set as a string
 		dataCache.filter(filterFunc(q, prop)).forEach(item => uniqueResults.add(JSON.stringify(item)));
 	}
@@ -661,10 +677,10 @@ app.get("/api/data/z/:querySearch", (req, res) => {
 		.filter(e => !globalFilter.includes(e))
 		.map(itemStr => JSON.parse(itemStr));
 
+	globalFilter = [];
+
 	if (!filteredData.length)
 		return res.status(400).send("Bad Request: Incorrect Query or Query Not Found");
-
-	globalFilter = [];
 
 	res.status(200).send(filteredData);
 });
@@ -689,8 +705,10 @@ app.get("/api/data/:queryProp/z/:querySearch", (req, res) => {
 	const uniqueResults = new Set<string>();
 
 	for (const q of querySearch.split(",")) {
-		if (q.length < 2 || q.length > 8)
+		if (q.length < 2 || q.length > 8) {
+			globalFilter = [];
 			return res.status(400).send("Bad Request: Subqueries Must Be 2-8 Characters Long");
+		}
 		// filter based on queries, then add to set as a string
 		dataCache.filter(filterFunc(q, prop)).forEach(item => uniqueResults.add(JSON.stringify(item)));
 	}
@@ -699,6 +717,8 @@ app.get("/api/data/:queryProp/z/:querySearch", (req, res) => {
 	const filteredData: DataSet[] = [...uniqueResults]
 		.filter(e => !globalFilter.includes(e))
 		.map(itemStr => JSON.parse(itemStr));
+
+	globalFilter = [];
 
 	if (!filteredData.length)
 		return res.status(400).send("Bad Request: Incorrect Query or Query Not Found");
@@ -710,8 +730,6 @@ app.get("/api/data/:queryProp/z/:querySearch", (req, res) => {
 			delete d[p as Props];
 		}
 	}
-
-	globalFilter = [];
 
 	res.status(200).send(filteredData);
 });
@@ -727,8 +745,10 @@ app.get("/api/data/complement/:querySearch", (req, res) => {
 	const uniqueResults = new Set<string>();
 
 	for (const q of querySearch.split(",")) {
-		if (q.length < 2 || q.length > 8)
+		if (q.length < 2 || q.length > 8) {
+			globalFilter = [];
 			return res.status(400).send("Bad Request: Subqueries Must Be 2-8 Characters Long");
+		}
 		// filter based on queries, then add to set as a string
 		dataCache.filter(filterFunc(q, prop)).forEach(item => uniqueResults.add(JSON.stringify(item)));
 	}
@@ -738,10 +758,10 @@ app.get("/api/data/complement/:querySearch", (req, res) => {
 		.filter(e => !globalFilter.includes(e))
 		.map(itemStr => JSON.parse(itemStr));
 
+	globalFilter = [];
+
 	if (!filteredData.length)
 		return res.status(400).send("Bad Request: Incorrect Query or Query Not Found");
-
-	globalFilter = [];
 
 	res.status(200).send(filteredData);
 });
@@ -766,8 +786,10 @@ app.get("/api/data/:queryProp/complement/:querySearch", (req, res) => {
 	const uniqueResults = new Set<string>();
 
 	for (const q of querySearch.split(",")) {
-		if (q.length < 2 || q.length > 8)
+		if (q.length < 2 || q.length > 8) {
+			globalFilter = [];
 			return res.status(400).send("Bad Request: Subqueries Must Be 2-8 Characters Long");
+		}
 		// filter based on queries, then add to set as a string
 		dataCache.filter(filterFunc(q, prop)).forEach(item => uniqueResults.add(JSON.stringify(item)));
 	}
@@ -776,6 +798,8 @@ app.get("/api/data/:queryProp/complement/:querySearch", (req, res) => {
 	const filteredData: DataSet[] = [...uniqueResults]
 		.filter(e => !globalFilter.includes(e))
 		.map(itemStr => JSON.parse(itemStr));
+
+	globalFilter = [];
 
 	if (!filteredData.length)
 		return res.status(400).send("Bad Request: Incorrect Query or Query Not Found");
@@ -787,8 +811,6 @@ app.get("/api/data/:queryProp/complement/:querySearch", (req, res) => {
 			delete d[p as Props];
 		}
 	}
-
-	globalFilter = [];
 
 	res.status(200).send(filteredData);
 });
@@ -804,8 +826,10 @@ app.get("/api/data/inversion/:querySearch", (req, res) => {
 	const uniqueResults = new Set<string>();
 
 	for (const q of querySearch.split(",")) {
-		if (q.length < 2 || q.length > 14)
+		if (q.length < 2 || q.length > 14) {
+			globalFilter = [];
 			return res.status(400).send("Bad Request: Subqueries Must Be 2-14 Characters Long");
+		}
 		// filter based on queries, then add to set as a string
 		dataCache
 			.filter(filterFunc(q, prop, { formatArrToString: true }))
@@ -817,10 +841,10 @@ app.get("/api/data/inversion/:querySearch", (req, res) => {
 		.filter(e => !globalFilter.includes(e))
 		.map(itemStr => JSON.parse(itemStr));
 
+	globalFilter = [];
+
 	if (!filteredData.length)
 		return res.status(400).send("Bad Request: Incorrect Query or Query Not Found");
-
-	globalFilter = [];
 
 	res.status(200).send(filteredData);
 });
@@ -845,8 +869,10 @@ app.get("/api/data/:queryProp/inversion/:querySearch", (req, res) => {
 	const uniqueResults = new Set<string>();
 
 	for (const q of querySearch.split(",")) {
-		if (q.length < 2 || q.length > 14)
+		if (q.length < 2 || q.length > 14) {
+			globalFilter = [];
 			return res.status(400).send("Bad Request: Subqueries Must Be 2-14 Characters Long");
+		}
 		// filter based on queries, then add to set as a string
 		dataCache
 			.filter(filterFunc(q, prop, { formatArrToString: true }))
@@ -858,6 +884,8 @@ app.get("/api/data/:queryProp/inversion/:querySearch", (req, res) => {
 		.filter(e => !globalFilter.includes(e))
 		.map(itemStr => JSON.parse(itemStr));
 
+	globalFilter = [];
+
 	if (!filteredData.length)
 		return res.status(400).send("Bad Request: Incorrect Query or Query Not Found");
 
@@ -868,8 +896,6 @@ app.get("/api/data/:queryProp/inversion/:querySearch", (req, res) => {
 			delete d[p as Props];
 		}
 	}
-
-	globalFilter = [];
 
 	res.status(200).send(filteredData);
 });
