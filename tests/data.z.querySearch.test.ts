@@ -48,7 +48,7 @@ const setD3 = (connectionType: string, jsonType: string, textType: string) => {
 
 readFiles();
 
-describe("GET /api/z/:querySearch", () => {
+describe("GET /api/data/z/:querySearch", () => {
 	it("should return 414 if uri is over length", done => {
 		chai
 			.request(server)
@@ -2352,6 +2352,96 @@ describe("GET /api/z/:querySearch", () => {
 		chai
 			.request(server)
 			.get("/api/data/z/!null,!@A,!@4,!^6,!7$")
+			.end((err, res) => {
+				should.not.exist(err);
+				res.body.should.deep.equal([
+					{
+						number: "5-z36A",
+						primeForm: '["0","1","2","4","7"]',
+						vec: "<2,2,2,1,2,1>",
+						z: "5-z12",
+						complement: "7-z36B",
+						inversion: '["0","3","5","6","7"]'
+					},
+					{
+						number: "5-z36B",
+						primeForm: '["0","3","5","6","7"]',
+						vec: "<2,2,2,1,2,1>",
+						z: "5-z12",
+						complement: "7-z36A",
+						inversion: '["0","1","2","4","7"]'
+					},
+					{
+						number: "7-z36A",
+						primeForm: '["0","1","2","3","5","6","8"]',
+						vec: "<4,4,4,3,4,2>",
+						z: "7-z12",
+						complement: "5-z36B",
+						inversion: '["0","2","3","5","6","7","8"]'
+					},
+					{
+						number: "7-z36B",
+						primeForm: '["0","2","3","5","6","7","8"]',
+						vec: "<4,4,4,3,4,2>",
+						z: "7-z12",
+						complement: "5-z36A",
+						inversion: '["0","1","2","3","5","6","8"]'
+					}
+				]);
+				res.should.have.status(200);
+				done();
+			});
+	});
+
+	it("should return 200 and correct data, single starts with", done => {
+		chai
+			.request(server)
+			.get("/api/data/z/^4-z")
+			.end((err, res) => {
+				should.not.exist(err);
+				res.body.should.deep.equal([
+					{
+						number: "4-z15A",
+						primeForm: '["0","1","4","6"]',
+						vec: "<1,1,1,1,1,1>",
+						z: "4-z29A",
+						complement: "8-z15B",
+						inversion: '["0","2","5","6"]'
+					},
+					{
+						number: "4-z15B",
+						primeForm: '["0","2","5","6"]',
+						vec: "<1,1,1,1,1,1>",
+						z: "4-z29A",
+						complement: "8-z15A",
+						inversion: '["0","1","4","6"]'
+					},
+					{
+						number: "4-z29A",
+						primeForm: '["0","1","3","7"]',
+						vec: "<1,1,1,1,1,1>",
+						z: "4-z15A",
+						complement: "8-z29B",
+						inversion: '["0","4","6","7"]'
+					},
+					{
+						number: "4-z29B",
+						primeForm: '["0","4","6","7"]',
+						vec: "<1,1,1,1,1,1>",
+						z: "4-z15A",
+						complement: "8-z29A",
+						inversion: '["0","1","3","7"]'
+					}
+				]);
+				res.should.have.status(200);
+				done();
+			});
+	});
+
+	it("should return 200 and correct data, not null and exclude variations", done => {
+		chai
+			.request(server)
+			.get("/api/data/z/!null,`@A,`@4,`^6,`7$")
 			.end((err, res) => {
 				should.not.exist(err);
 				res.body.should.deep.equal([
