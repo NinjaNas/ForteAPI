@@ -1308,6 +1308,25 @@ describe("GET /api/data/:queryProp/number/:querySearch", () => {
 			});
 	});
 
+	it("should return 200 and correct data, most exclusion methods using !` no duplicates, number", done => {
+		chai
+			.request(server)
+			.get("/api/data/number/number/!0-1~8-7,!@8,!^9,!1$,!`10-2~10-4")
+			.end((err, res) => {
+				should.not.exist(err);
+				res.body.should.deep.equal([
+					{
+						number: "10-5"
+					},
+					{
+						number: "10-6"
+					}
+				]);
+				res.should.have.status(200);
+				done();
+			});
+	});
+
 	it("should return 200 and correct data, not range, complement", done => {
 		chai
 			.request(server)

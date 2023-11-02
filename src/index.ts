@@ -160,14 +160,12 @@ const filterFunc = (
 
 		// if res is true add to global
 
-		if (isExcludeFlag && res) {
-			globalFilter.push(JSON.stringify(e));
-			return false;
-		}
-
 		// add a flag to filter out duplicates later, if they are readded in another query
 		if (isNotFlag && res) {
 			globalFilter.push(JSON.stringify(e));
+		} else if (isExcludeFlag && res) {
+			globalFilter.push(JSON.stringify(e));
+			return false;
 		}
 
 		return isNotFlag ? !res : res;
@@ -267,14 +265,14 @@ app.get("/api/data/number/:querySearch", (req, res) => {
 			);
 			if (range.length === 2) {
 				// slice by range, then add to set as a string
-				if (isExcludeFlag) {
-					dataCache
-						.filter(e => dataCache.slice(range[0], range[1] + 1).includes(e))
-						.forEach(item => globalFilter.push(JSON.stringify(item)));
-				} else if (isNotFlag) {
+				if (isNotFlag) {
 					dataCache
 						.filter(e => !dataCache.slice(range[0], range[1] + 1).includes(e))
 						.forEach(item => uniqueResults.add(JSON.stringify(item)));
+					dataCache
+						.filter(e => dataCache.slice(range[0], range[1] + 1).includes(e))
+						.forEach(item => globalFilter.push(JSON.stringify(item)));
+				} else if (isExcludeFlag) {
 					dataCache
 						.filter(e => dataCache.slice(range[0], range[1] + 1).includes(e))
 						.forEach(item => globalFilter.push(JSON.stringify(item)));
@@ -343,14 +341,14 @@ app.get("/api/data/:queryProp/number/:querySearch", (req, res) => {
 			);
 			if (range.length === 2) {
 				// slice by range, then add to set as a string
-				if (isExcludeFlag) {
-					dataCache
-						.filter(e => dataCache.slice(range[0], range[1] + 1).includes(e))
-						.forEach(item => globalFilter.push(JSON.stringify(item)));
-				} else if (isNotFlag) {
+				if (isNotFlag) {
 					dataCache
 						.filter(e => !dataCache.slice(range[0], range[1] + 1).includes(e))
 						.forEach(item => uniqueResults.add(JSON.stringify(item)));
+					dataCache
+						.filter(e => dataCache.slice(range[0], range[1] + 1).includes(e))
+						.forEach(item => globalFilter.push(JSON.stringify(item)));
+				} else if (isExcludeFlag) {
 					dataCache
 						.filter(e => dataCache.slice(range[0], range[1] + 1).includes(e))
 						.forEach(item => globalFilter.push(JSON.stringify(item)));

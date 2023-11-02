@@ -3352,6 +3352,35 @@ describe("GET /api/data/number/:querySearch", () => {
 			});
 	});
 
+	it("should return 200 and correct data, most exclusion methods using !` no duplicates", done => {
+		chai
+			.request(server)
+			.get("/api/data/number/!0-1~8-7,!@8,!^9,!1$,!`10-2~10-4")
+			.end((err, res) => {
+				should.not.exist(err);
+				res.body.should.deep.equal([
+					{
+						number: "10-5",
+						primeForm: '["0","1","2","3","4","5","7","8","9","T"]',
+						vec: "<8,8,8,8,9,4>",
+						z: null,
+						complement: "2-5",
+						inversion: null
+					},
+					{
+						number: "10-6",
+						primeForm: '["0","1","2","3","4","6","7","8","9","T"]',
+						vec: "<8,8,8,8,8,5>",
+						z: null,
+						complement: "2-6",
+						inversion: null
+					}
+				]);
+				res.should.have.status(200);
+				done();
+			});
+	});
+
 	it("should return 200 and correct data, no duplicates", done => {
 		chai
 			.request(server)
