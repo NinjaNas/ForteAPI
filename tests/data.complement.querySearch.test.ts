@@ -12,10 +12,18 @@ const flatData: FlatData = {};
 const d3Data: D3Data = {};
 
 const d3 = [
-	"cardinal,dag,inversions",
-	"cardinal,link,inversions",
-	"strict,dag,inversions",
-	"strict,link,inversions"
+	"cardinal,inversion,dag",
+	"cardinal,inversion,links",
+	"cardinal,original,dag",
+	"cardinal,original,links",
+	"strict,inversion,dag",
+	"strict,inversion,links",
+	"strict,original,dag",
+	"strict,original,links",
+	"vector,inversion,dag",
+	"vector,inversion,links",
+	"vector,original,dag",
+	"vector,original,links"
 ];
 
 const readFiles = () => {
@@ -38,12 +46,9 @@ const setSetClasses = () => {
 	});
 };
 
-const setD3 = (connectionType: string, jsonType: string, textType: string) => {
-	const data = fs.readFileSync(
-		`./data/d3/${connectionType}-increasing/${jsonType}s/${textType}.json`,
-		"utf8"
-	);
-	d3Data[connectionType + jsonType + textType] = JSON.parse(data);
+const setD3 = (connectionType: string, nodeType: string, jsonType: string) => {
+	const data = fs.readFileSync(`./data/d3/${connectionType}${nodeType}${jsonType}.json`, "utf8");
+	d3Data[connectionType + nodeType + jsonType] = JSON.parse(data);
 };
 
 readFiles();

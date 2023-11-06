@@ -12,10 +12,18 @@ const flatData: FlatData = {};
 const d3Data: D3Data = {};
 
 const d3 = [
-	"cardinal,dag,inversions",
-	"cardinal,link,inversions",
-	"strict,dag,inversions",
-	"strict,link,inversions"
+	"cardinal,inversion,dag",
+	"cardinal,inversion,links",
+	"cardinal,original,dag",
+	"cardinal,original,links",
+	"strict,inversion,dag",
+	"strict,inversion,links",
+	"strict,original,dag",
+	"strict,original,links",
+	"vector,inversion,dag",
+	"vector,inversion,links",
+	"vector,original,dag",
+	"vector,original,links"
 ];
 
 const readFiles = () => {
@@ -38,12 +46,9 @@ const setSetClasses = () => {
 	});
 };
 
-const setD3 = (connectionType: string, jsonType: string, textType: string) => {
-	const data = fs.readFileSync(
-		`./data/d3/${connectionType}-increasing/${jsonType}s/${textType}.json`,
-		"utf8"
-	);
-	d3Data[connectionType + jsonType + textType] = JSON.parse(data);
+const setD3 = (connectionType: string, nodeType: string, jsonType: string) => {
+	const data = fs.readFileSync(`./data/d3/${connectionType}${nodeType}${jsonType}.json`, "utf8");
+	d3Data[connectionType + nodeType + jsonType] = JSON.parse(data);
 };
 
 readFiles();
@@ -99,49 +104,145 @@ describe("GET /api/data/d3/:query", () => {
 			});
 	});
 
-	it("should return 200 and correct data, cardinallinkinversions", done => {
+	it("should return 200 and correct data, cardinalinversionlinks", done => {
 		chai
 			.request(server)
-			.get("/api/data/d3/cardinallinkinversions")
+			.get("/api/data/d3/cardinalinversionlinks")
 			.end((err, res) => {
 				should.not.exist(err);
-				res.body.should.deep.equal(d3Data["cardinallinkinversions"]);
+				res.body.should.deep.equal(d3Data["cardinalinversionlinks"]);
 				res.should.have.status(200);
 				done();
 			});
 	});
 
-	it("should return 200 and correct data, cardinaldaginversions", done => {
+	it("should return 200 and correct data, cardinalinversiondag", done => {
 		chai
 			.request(server)
-			.get("/api/data/d3/cardinaldaginversions")
+			.get("/api/data/d3/cardinalinversiondag")
 			.end((err, res) => {
 				should.not.exist(err);
-				res.body.should.deep.equal(d3Data["cardinaldaginversions"]);
+				res.body.should.deep.equal(d3Data["cardinalinversiondag"]);
 				res.should.have.status(200);
 				done();
 			});
 	});
 
-	it("should return 200 and correct data, strictlinkinversions", done => {
+	it("should return 200 and correct data, cardinaloriginallinks", done => {
 		chai
 			.request(server)
-			.get("/api/data/d3/strictlinkinversions")
+			.get("/api/data/d3/cardinaloriginallinks")
 			.end((err, res) => {
 				should.not.exist(err);
-				res.body.should.deep.equal(d3Data["strictlinkinversions"]);
+				res.body.should.deep.equal(d3Data["cardinaloriginallinks"]);
 				res.should.have.status(200);
 				done();
 			});
 	});
 
-	it("should return 200 and correct data, strictdaginversions", done => {
+	it("should return 200 and correct data, cardinaloriginaldag", done => {
 		chai
 			.request(server)
-			.get("/api/data/d3/strictdaginversions")
+			.get("/api/data/d3/cardinaloriginaldag")
 			.end((err, res) => {
 				should.not.exist(err);
-				res.body.should.deep.equal(d3Data["strictdaginversions"]);
+				res.body.should.deep.equal(d3Data["cardinaloriginaldag"]);
+				res.should.have.status(200);
+				done();
+			});
+	});
+
+	it("should return 200 and correct data, strictinversionlinks", done => {
+		chai
+			.request(server)
+			.get("/api/data/d3/strictinversionlinks")
+			.end((err, res) => {
+				should.not.exist(err);
+				res.body.should.deep.equal(d3Data["strictinversionlinks"]);
+				res.should.have.status(200);
+				done();
+			});
+	});
+
+	it("should return 200 and correct data, strictinversiondag", done => {
+		chai
+			.request(server)
+			.get("/api/data/d3/strictinversiondag")
+			.end((err, res) => {
+				should.not.exist(err);
+				res.body.should.deep.equal(d3Data["strictinversiondag"]);
+				res.should.have.status(200);
+				done();
+			});
+	});
+
+	it("should return 200 and correct data, strictoriginallinks", done => {
+		chai
+			.request(server)
+			.get("/api/data/d3/strictoriginallinks")
+			.end((err, res) => {
+				should.not.exist(err);
+				res.body.should.deep.equal(d3Data["strictoriginallinks"]);
+				res.should.have.status(200);
+				done();
+			});
+	});
+
+	it("should return 200 and correct data, strictoriginaldag", done => {
+		chai
+			.request(server)
+			.get("/api/data/d3/strictoriginaldag")
+			.end((err, res) => {
+				should.not.exist(err);
+				res.body.should.deep.equal(d3Data["strictoriginaldag"]);
+				res.should.have.status(200);
+				done();
+			});
+	});
+
+	it("should return 200 and correct data, vectorinversionlinks", done => {
+		chai
+			.request(server)
+			.get("/api/data/d3/vectorinversionlinks")
+			.end((err, res) => {
+				should.not.exist(err);
+				res.body.should.deep.equal(d3Data["vectorinversionlinks"]);
+				res.should.have.status(200);
+				done();
+			});
+	});
+
+	it("should return 200 and correct data, vectorinversiondag", done => {
+		chai
+			.request(server)
+			.get("/api/data/d3/vectorinversiondag")
+			.end((err, res) => {
+				should.not.exist(err);
+				res.body.should.deep.equal(d3Data["vectorinversiondag"]);
+				res.should.have.status(200);
+				done();
+			});
+	});
+
+	it("should return 200 and correct data, vectororiginallinks", done => {
+		chai
+			.request(server)
+			.get("/api/data/d3/vectororiginallinks")
+			.end((err, res) => {
+				should.not.exist(err);
+				res.body.should.deep.equal(d3Data["vectororiginallinks"]);
+				res.should.have.status(200);
+				done();
+			});
+	});
+
+	it("should return 200 and correct data, vectororiginaldag", done => {
+		chai
+			.request(server)
+			.get("/api/data/d3/vectororiginaldag")
+			.end((err, res) => {
+				should.not.exist(err);
+				res.body.should.deep.equal(d3Data["vectororiginaldag"]);
 				res.should.have.status(200);
 				done();
 			});
