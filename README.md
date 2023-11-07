@@ -16,10 +16,6 @@ Forte API is a music theory API that provides a way to query set classes in 12 t
 
 ##
 
-**Update Version 1.3.0 is done (functionality-wise) and is live on AWS, however, the README and SwaggerDoc still needs to be updated, plus additional testing is needed for stability and integrity**
-
-**This API is going through an overhaul of the endpoints and functionalities, please wait until v1.3.0 before using! Thank You! :)**
-
 **Currently this API is live [here](https://hcda8f8dtk.execute-api.us-east-1.amazonaws.com/prod/api/data/) using AWS API Gateway + AWS Lambda!**
 **Check out the OpenAPI docs on SwaggerHub [here](https://app.swaggerhub.com/apis-docs/NinjaNas/ForteAPI/1.2.1)!**
 
@@ -40,35 +36,42 @@ Forte API is a music theory API that provides a way to query set classes in 12 t
 - [Should I use this API?](#should-i-use-this-api)
 - [DataSet Type](#dataset-type)
 - [Endpoints](#endpoints)
-  - [GET /api/data](#get-apidata)
-  - [GET /api/data/:prop/](#get-apidataprop)
-  - [GET /api/flatdata/:prop/](#get-apiflatdataprop)
+  - [GET /api/data/](#get-apidata)
+  - [GET /api/data/:queryProp/](#get-apidataqueryprop)
+  - [GET /api/flatdata/:queryprop/](#get-apiflatdataqueryprop)
     - [number](#number)
     - [primeForm](#primeform)
     - [vec](#vec)
     - [z](#z)
     - [complement](#complement)
-  - [GET /api/data/number/:query](#get-apidatanumberquery)
+    - [inversion](#inversion)
+  - [GET /api/hashdata/:queryPropKey/:queryPropValue/](#get-apihashdataquerypropkeyquerypropvalue)
+  - [GET /api/data/number/:querySearch/](#get-apidatanumberquerysearch)
     - [Exact Search](#exact-search)
     - [Starts With Search](#starts-with-search)
     - [Ends With Search](#ends-with-search)
+    - [Contains Search (order does not matter)](contains-search-order-does-not-matter)
+    - [Contains Search (order matters)](contains-search-order-matters)
     - [Range Search](#range-search-inclusive)
+    - [Not Search](#not-search)
+    - [Exclude Search](#exclude-search)
     - [Chaining Methods](#chaining-methods-no-duplicates)
-  - [GET /api/data/primeForm/:query](#get-apidataprimeformquery)
+  - [GET /api/data/primeForm/:query/](#get-apidataprimeformquery)
     - [Exact Search](#exact-search-1)
     - [Fuzzy Search / Superset Search](#fuzzy-search--superset-search)
-  - [GET /api/data/vec/:query](#get-apidatavecquery)
+  - [GET /api/data/vec/:query/](#get-apidatavecquery)
     - [Exact Search](#exact-search-2)
     - [Wildcard Search](#wildcard-search)
-  - [GET /api/data/z/:query](#get-apidatazquery)
+  - [GET /api/data/z/:query/](#get-apidatazquery)
     - [Exact Search](#exact-search-3)
     - [Starts With Search](#starts-with-search-1)
     - [Ends With Search](#ends-with-search-1)
-  - [GET /api/data/complement/:query](#get-apidatacomplementquery)
+  - [GET /api/data/complement/:query/](#get-apidatacomplementquery)
     - [Exact Search](#exact-search-4)
     - [Starts With Search](#starts-with-search-2)
     - [Ends With Search](#ends-with-search-2)
-  - [GET /api/data/d3/:query](#get-apidatad3query)
+  - [GET /api/data/:queryProp/PROPERTY/querySearch](#get-apidataqueryproppropertyquerysearch)
+  - [GET /api/data/d3/:query/](#get-apidatad3query)
     - [Types](#types)
     - [Cardinality-Increasing vs Strict-Increasing](#cardinality-increasing-vs-strict-increasing)
     - [Manual Construction](#manual-construction)
@@ -120,7 +123,7 @@ The labels are structured by cardinality-ordinal number.
 - Ex. 3-6 meaning the 6th set in order of sets containing 3 pitch classes/notes.
 - In general the smaller the ordinal number the more compact the set is.
 
-If there is A or B appended to the end it means that set has a distinct inversion, where A is given to the most compact version. Both A and B share the same interval vector
+Allen Forte did not differentiate between inversions in his book so 3-11A and 3-11B would just be 3-11 using 3-11A as its most compact form. Later on, notation was made to differentiate between inversions. If there is A or B appended to the end it means that set has a distinct inversion, where A is given to the most compact version. Both A and B sets share the same interval vector.
 
 - Ex. 3-11A and 3-11B
 - 3-11A has a prime form of {0,3,7} and 3-11B has a prime form of {0,3,7}
@@ -160,7 +163,8 @@ type DataSet = {
 	vec: string;
 	z: null | string;
 	complement: null | string;
-};
+	inversion: null | string;
+}[];
 ```
 
 ## Endpoints
@@ -171,29 +175,32 @@ The endpoint returns all of the data from [/data/set-classes.json](https://githu
 
 ```ts
 [
-	{
-		number: "0-1",
-		primeForm: '[""]',
-		vec: "<0,0,0,0,0,0>",
-		z: null,
-		complement: "12-1"
-	},
-	  ...
-	{
-		number: "12-1",
-		primeForm: '["0","1","2","3","4","5","6","7","8","9","T","E"]',
-		vec: "<C,C,C,C,C,6>",
-		z: null,
-		complement: "0-1"
-	}
+  {
+    "number": "0-1",
+    "primeForm": "[\"\"]",
+    "vec": "<0,0,0,0,0,0>",
+    "z": null,
+    "complement": "12-1",
+    "inversion": null
+  },
+    ...
+  {
+    "number": "12-1",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\",\"T\",\"E\"]",
+    "vec": "<C,C,C,C,C,6>",
+    "z": null,
+    "complement": "0-1",
+    "inversion": null
+  }
 ];
 ```
 
-### GET /api/data/:prop/
+### GET /api/data/:queryProp/
 
-The endpoint returns the full data given the properties provided in a comma separated list (number, primeForm, vec, z, complement)
+The endpoint returns the full data given the properties provided in a comma separated list (number, primeForm, vec, z, complement, inversion)
 
-- Max URI length: No more than 33 characters
+- Max URI length: No more than 43 characters
+- Subquery length: 1-10 characters
 
 ```ts
 // GET /api/data/number
@@ -211,19 +218,21 @@ The endpoint returns the full data given the properties provided in a comma sepa
 [
   {
     "number": "0-1"
-    "primeForm": '[""]'
+    "primeForm": "[\"\"]",
   },
     ...
   {
     "number": "12-1"
-    "primeForm": '["0","1","2","3","4","5","6","7","8","9","T","E"]'
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\",\"T\",\"E\"]"
   },
 ];
 ```
 
-### GET /api/flatdata/:prop/
+### GET /api/flatdata/:queryProp/
 
-The endpoint returns a flatmap of the valid properties (number, primeForm, vec, z, complement)
+The endpoint returns a flatmap of the valid properties (number, primeForm, vec, z, complement, inversion)
+
+- Max URI length: No more than 10 characters
 
 #### number
 
@@ -236,7 +245,7 @@ The endpoint returns a flatmap of the valid properties (number, primeForm, vec, 
 
 ```ts
 // GET /api/flatdata/primeForm
-['[""]', ..., '["0","1","2","3","4","5","6","7","8","9","T","E"]'];
+["[\"\"]", ..., "[\"0\",\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\",\"T\",\"E\"]"];
 ```
 
 #### vec
@@ -259,25 +268,51 @@ The endpoint returns a flatmap of the valid properties (number, primeForm, vec, 
 // GET /api/flatdata/complement
 ["12-1", ..., "0-1"];
 ```
+#### inversion
 
-### GET /api/data/number/:query
+```ts
+// GET /api/flatdata/inversion
+["null", ..., "[\"0\",\"2\",\"5\",\"6\"]", ..., "null"];
+```
+
+
+### GET /api/hashdata/:queryPropKey/:queryPropValue/
+
+The endpoint returns a hashmap with two the valid properties (number, primeForm, vec, z, complement, inversion)
+
+- Max URI length For Both Queries: No more than 10 characters
+
+```ts
+// GET /api/hashdata/number/primeForm
+{
+  "0-1": "[\"\"]",
+    ...
+  "12-1": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\",\"T\",\"E\"]"
+};
+```
+
+
+### GET /api/data/number/:querySearch
 
 The endpoint returns an array of objects based on the query on the number property
 
 - Max URI length: No more than 100 characters
+- Subquery length: 2-15 characters
+	- Ex. ^1 or !`6-z25A~6-z25B
 
 #### Exact Search
 
 ```ts
-// GET /api/data/number/1-1 or GET /api/data/number/^1-1$
+// GET /api/data/number/1-1
 [
-	{
-		number: "1-1",
-		primeForm: '["0"]',
-		vec: "<0,0,0,0,0,0>",
-		z: null,
-		complement: "11-1"
-	}
+  {
+    "number": "1-1",
+    "primeForm": "[\"0\"]",
+    "vec": "<0,0,0,0,0,0>",
+    "z": null,
+    "complement": "11-1",
+    "inversion": null
+  }
 ];
 ```
 
@@ -286,20 +321,22 @@ The endpoint returns an array of objects based on the query on the number proper
 ```ts
 // GET /api/data/number/^4-z15
 [
-	{
-		number: "4-z15A",
-		primeForm: '["0","1","4","6"]',
-		vec: "<1,1,1,1,1,1>",
-		z: "4-z29A",
-		complement: "8-z15B"
-	},
-	{
-		number: "4-z15B",
-		primeForm: '["0","2","5","6"]',
-		vec: "<1,1,1,1,1,1>",
-		z: "4-z29A",
-		complement: "8-z15A"
-	}
+  {
+    "number": "4-z15A",
+    "primeForm": "[\"0\",\"1\",\"4\",\"6\"]",
+    "vec": "<1,1,1,1,1,1>",
+    "z": "4-z29A",
+    "complement": "8-z15B",
+    "inversion": "[\"0\",\"2\",\"5\",\"6\"]"
+  },
+  {
+    "number": "4-z15B",
+    "primeForm": "[\"0\",\"2\",\"5\",\"6\"]",
+    "vec": "<1,1,1,1,1,1>",
+    "z": "4-z29A",
+    "complement": "8-z15A",
+    "inversion": "[\"0\",\"1\",\"4\",\"6\"]"
+  }
 ];
 ```
 
@@ -308,80 +345,225 @@ The endpoint returns an array of objects based on the query on the number proper
 ```ts
 // GET /api/data/number/-z50$
 [
-	{
-		number: "6-z50",
-		primeForm: '["0","1","4","6","7","9"]',
-		vec: "<2,2,4,2,3,2>",
-		z: "6-z29",
-		complement: "6-z29"
-	}
+  {
+    "number": "6-z50",
+    "primeForm": "[\"0\",\"1\",\"4\",\"6\",\"7\",\"9\"]",
+    "vec": "<2,2,4,2,3,2>",
+    "z": "6-z29",
+    "complement": "6-z29",
+    "inversion": null
+  }
+];
+```
+
+#### Contains Search (order does not matter)
+
+```ts
+// GET /api/data/number/@12A or GET /api/data/number/@21A
+[
+  {
+    "number": "4-12A",
+    "primeForm": "[\"0\",\"2\",\"3\",\"6\"]",
+    "vec": "<1,1,2,1,0,1>",
+    "z": null,
+    "complement": "8-12A",
+    "inversion": "[\"0\",\"3\",\"4\",\"6\"]"
+  },
+  {
+    "number": "5-21A",
+    "primeForm": "[\"0\",\"1\",\"4\",\"5\",\"8\"]",
+    "vec": "<2,0,2,4,2,0>",
+    "z": null,
+    "complement": "7-21B",
+    "inversion": "[\"0\",\"3\",\"4\",\"7\",\"8\"]"
+  },
+  {
+    "number": "6-z12A",
+    "primeForm": "[\"0\",\"1\",\"2\",\"4\",\"6\",\"7\"]",
+    "vec": "<3,3,2,2,3,2>",
+    "z": "6-z41A",
+    "complement": "6-z41B",
+    "inversion": "[\"0\",\"1\",\"3\",\"5\",\"6\",\"7\"]"
+  },
+  {
+    "number": "6-21A",
+    "primeForm": "[\"0\",\"2\",\"3\",\"4\",\"6\",\"8\"]",
+    "vec": "<2,4,2,4,1,2>",
+    "z": null,
+    "complement": null,
+    "inversion": "[\"0\",\"2\",\"4\",\"5\",\"6\",\"8\"]"
+  },
+  {
+    "number": "7-21A",
+    "primeForm": "[\"0\",\"1\",\"2\",\"4\",\"5\",\"8\",\"9\"]",
+    "vec": "<4,2,4,6,4,1>",
+    "z": null,
+    "complement": "5-21B",
+    "inversion": "[\"0\",\"1\",\"3\",\"4\",\"5\",\"8\",\"9\"]"
+  },
+  {
+    "number": "8-12A",
+    "primeForm": "[\"0\",\"1\",\"3\",\"4\",\"5\",\"6\",\"7\",\"9\"]",
+    "vec": "<5,5,6,5,4,3>",
+    "z": null,
+    "complement": "4-12A",
+    "inversion": "[\"0\",\"2\",\"3\",\"4\",\"5\",\"6\",\"8\",\"9\"]"
+  }
+];
+```
+
+#### Contains Search (order matters)
+
+```ts
+// GET /api/data/number/*12A
+[
+  {
+    "number": "4-12A",
+    "primeForm": "[\"0\",\"2\",\"3\",\"6\"]",
+    "vec": "<1,1,2,1,0,1>",
+    "z": null,
+    "complement": "8-12A",
+    "inversion": "[\"0\",\"3\",\"4\",\"6\"]"
+  },
+  {
+    "number": "6-z12A",
+    "primeForm": "[\"0\",\"1\",\"2\",\"4\",\"6\",\"7\"]",
+    "vec": "<3,3,2,2,3,2>",
+    "z": "6-z41A",
+    "complement": "6-z41B",
+    "inversion": "[\"0\",\"1\",\"3\",\"5\",\"6\",\"7\"]"
+  },
+  {
+    "number": "8-12A",
+    "primeForm": "[\"0\",\"1\",\"3\",\"4\",\"5\",\"6\",\"7\",\"9\"]",
+    "vec": "<5,5,6,5,4,3>",
+    "z": null,
+    "complement": "4-12A",
+    "inversion": "[\"0\",\"2\",\"3\",\"4\",\"5\",\"6\",\"8\",\"9\"]"
+  }
 ];
 ```
 
 #### Range Search (inclusive)
 
+The only filtering methods that you can use with range search are \` and ! (which is also !\`).
+  - Ex: \`1-1\~2-1, !1-1\~2-1, !\`1-1\~2-1
+
 ```ts
 // GET /api/data/number/1-1~2-1
 // WARNING: 1-1~1-1 is invalid and will send a 400 status code, use 1-1 instead
 [
-	{
-		number: "1-1",
-		primeForm: '["0"]',
-		vec: "<0,0,0,0,0,0>",
-		z: null,
-		complement: "11-1"
-	},
-	{
-		number: "2-1",
-		primeForm: '["0","1"]',
-		vec: "<1,0,0,0,0,0>",
-		z: null,
-		complement: "10-1"
-	}
+  {
+    "number": "1-1",
+    "primeForm": "[\"0\"]",
+    "vec": "<0,0,0,0,0,0>",
+    "z": null,
+    "complement": "11-1",
+    "inversion": null
+  },
+  {
+    "number": "2-1",
+    "primeForm": "[\"0\",\"1\"]",
+    "vec": "<1,0,0,0,0,0>",
+    "z": null,
+    "complement": "10-1",
+    "inversion": null
+  }
+];
+```
+
+#### Not Search
+
+- Works with !1-1, !^1-1, !1-1$, !@A, !*A, !1-1~2-2
+  - ! is equivalent to !` 
+  - `! is not a valid search method
+
+```ts
+// GET /api/data/number/!1-1
+[
+  {
+    "number": "1-1",
+    "primeForm": "[\"0\"]",
+    "vec": "<0,0,0,0,0,0>",
+    "z": null,
+    "complement": "11-1",
+    "inversion": null
+  },
+    ...,
+  {
+    "number": "12-1",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\",\"T\",\"E\"]",
+    "vec": "<C,C,C,C,C,6>",
+    "z": null,
+    "complement": "0-1",
+    "inversion": null
+  }
+];
+```
+
+#### Exclude Search
+
+- Works with \`1-1, \`^1-1, \`$1-1, \`@A, \`*A, \`1-1~2-2
+
+```ts
+// GET /api/data/number/1-1~2-4,`1-1~2-2
+[
+  {
+    "number": "2-3",
+    "primeForm": "[\"0\",\"3\"]",
+    "vec": "<0,0,1,0,0,0>",
+    "z": null,
+    "complement": "10-3",
+    "inversion": null
+  },
+  {
+    "number": "2-4",
+    "primeForm": "[\"0\",\"4\"]",
+    "vec": "<0,0,0,1,0,0>",
+    "z": null,
+    "complement": "10-4",
+    "inversion": null
+  }
 ];
 ```
 
 #### Chaining Methods (no duplicates)
 
 ```ts
-// chaining methods (no duplicates):
-// GET /api/data/number/1-1,^1-1$,^4-z15,-z50$,1-1~2-1
+// GET /api/data/number/1-1,^1-1$,^4-z15,-z50$,1-1~2-1,`4-z15B
 [
-	{
-		number: "1-1",
-		primeForm: '["0"]',
-		vec: "<0,0,0,0,0,0>",
-		z: null,
-		complement: "11-1"
-	},
-	{
-		number: "4-z15A",
-		primeForm: '["0","1","4","6"]',
-		vec: "<1,1,1,1,1,1>",
-		z: "4-z29A",
-		complement: "8-z15B"
-	},
-	{
-		number: "4-z15B",
-		primeForm: '["0","2","5","6"]',
-		vec: "<1,1,1,1,1,1>",
-		z: "4-z29A",
-		complement: "8-z15A"
-	},
-	{
-		number: "6-z50",
-		primeForm: '["0","1","4","6","7","9"]',
-		vec: "<2,2,4,2,3,2>",
-		z: "6-z29",
-		complement: "6-z29"
-	},
-	{
-		number: "2-1",
-		primeForm: '["0","1"]',
-		vec: "<1,0,0,0,0,0>",
-		z: null,
-		complement: "10-1"
-	}
+  {
+    "number": "1-1",
+    "primeForm": "[\"0\"]",
+    "vec": "<0,0,0,0,0,0>",
+    "z": null,
+    "complement": "11-1",
+    "inversion": null
+  },
+  {
+    "number": "4-z15A",
+    "primeForm": "[\"0\",\"1\",\"4\",\"6\"]",
+    "vec": "<1,1,1,1,1,1>",
+    "z": "4-z29A",
+    "complement": "8-z15B",
+    "inversion": "[\"0\",\"2\",\"5\",\"6\"]"
+  },
+  {
+    "number": "6-z50",
+    "primeForm": "[\"0\",\"1\",\"4\",\"6\",\"7\",\"9\"]",
+    "vec": "<2,2,4,2,3,2>",
+    "z": "6-z29",
+    "complement": "6-z29",
+    "inversion": null
+  },
+  {
+    "number": "2-1",
+    "primeForm": "[\"0\",\"1\"]",
+    "vec": "<1,0,0,0,0,0>",
+    "z": null,
+    "complement": "10-1",
+    "inversion": null
+  }
 ];
 ```
 
@@ -647,6 +829,41 @@ The endpoint returns an array of objects based on the query on the complement pr
 		z: "6-z50",
 		complement: "6-z50"
 	}
+];
+```
+
+
+### GET /api/data/:queryProp/PROPERTY/querySearch
+
+Using the GET /api/data/:queryProp endpoint you can filter out the properties you want from the resulting querySearch
+
+Lengths For :queryProp\:
+- Max URI length: No more than 43 characters
+- Subquery length: 1-10 characters
+
+Endpoints:
+- /api/data/:queryProp/number/:querySearch
+- /api/data/:queryProp/primeForm/:querySearch
+- /api/data/:queryProp/vec/:querySearch
+- /api/data/:queryProp/vec/:querySearch/:queryInequality
+- /api/data/:queryProp/z/:querySearch
+- /api/data/:queryProp/complement/:querySearch
+- /api/data/:queryProp/inversion/:querySearch
+
+```ts
+// GET /api/data/primeForm/number/1-1
+[
+  {
+    "primeForm": "[\"0\"]"
+  }
+];
+
+// GET /api/data/number,primeForm/number/1-1
+[
+  {
+    "number": "1-1",
+    "primeForm": "[\"0\"]"
+  }
 ];
 ```
 
