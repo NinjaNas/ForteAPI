@@ -1,4 +1,9 @@
 # ForteAPI
+<div align="center">
+<h3></h3>
+<img width="100" height="100" src="https://img.icons8.com/ios-filled/100/curly-brackets.png" alt="curly-brackets"/>
+<h3></h3>
+</div>
 
 <div align="center">
 <img alt="GitHub last commit (branch)" src="https://img.shields.io/github/last-commit/NinjaNas/ForteAPI/main">
@@ -10,6 +15,10 @@
 Forte API is a music theory API that provides a way to query set classes in 12 tone equal temperament. It uses data scraped from this <a href="https://en.wikipedia.org/wiki/List_of_set_classes">wikipedia page</a> to provide Forte numbers, prime forms, interval vectors, zygotic or twinned sets, and complements of sets.
 
 ##
+
+**Update Version 1.3.0 is done (functionality-wise) and is live on AWS, however, the README and SwaggerDoc still needs to be updated, plus additional testing is needed for stability and integrity**
+
+**This API is going through an overhaul of the endpoints and functionalities, please wait until v1.3.0 before using! Thank You! :)**
 
 **Currently this API is live [here](https://hcda8f8dtk.execute-api.us-east-1.amazonaws.com/prod/api/data/) using AWS API Gateway + AWS Lambda!**
 **Check out the OpenAPI docs on SwaggerHub [here](https://app.swaggerhub.com/apis-docs/NinjaNas/ForteAPI/1.2.1)!**
