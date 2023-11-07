@@ -17,6 +17,7 @@
 			"*": ["node_modules/*"]
 		}
 	},
-	"exclude": ["./node_modules/", "./dist/"],
-	"include": ["src/**/*.ts", "types/**/*.d.ts", "tests/**/*.ts"]
+	"exclude": ["./node_modules/", "./dist/", "tests/**/*.ts"],
+	"include": ["src/**/*.ts", "types/**/*.d.ts"]
+	// "include": ["src/**/*.ts", "types/**/*.d.ts", "tests/**/*.ts"] for dev
 }
