@@ -101,6 +101,7 @@ Forte API is a music theory API that provides a way to query set classes in 12 t
     - [Exclude Search](#exclude-search-5)
     - [Chaining Methods](#chaining-methods-no-duplicates-5)
   - [GET /api/data/:queryProp/PROPERTY/querySearch](#get-apidataqueryproppropertyquerysearch)
+    - [Endpoints](#endpoints) 
   - [GET /api/data/d3/:querySearch/](#get-apidatad3querysearch)
     - [Types](#types)
     - [Cardinality-Increasing vs Strict-Increasing](#cardinality-increasing-vs-strict-increasing)
@@ -2069,7 +2070,7 @@ Lengths For :queryProp\:
 - Max URI length: No more than 43 characters
 - Subquery length: 1-10 characters
 
-Endpoints:
+##### Endpoints:
 - /api/data/:queryProp/number/:querySearch/
 - /api/data/:queryProp/primeForm/:querySearch/
 - /api/data/:queryProp/vec/:querySearch/
