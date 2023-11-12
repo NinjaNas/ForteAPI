@@ -144,6 +144,10 @@ const filterFunc = (
 								e[prop] &&
 								(formatArrToString ? e[prop].replace(/(?![TEC])\D/g, "") : e[prop]).includes(c)
 						);
+			case q.startsWith("*"):
+				return (e: StrObj) =>
+					e[prop] &&
+					(formatArrToString ? e[prop].replace(/(?![TEC])\D/g, "") : e[prop]).includes(q.slice(1));
 			case prop === "vec" && q.length === 6:
 				// for vec examples: 111111, 1XXXXX, !111111, !1XXXXX
 				// note that ! is removed beforehand
@@ -316,7 +320,7 @@ app.get("/api/data/:queryProp/number/:querySearch", (req, res) => {
 	if (!dataCache) return res.sendStatus(500);
 
 	const { queryProp } = req.params;
-	if (queryProp.length > 100) return res.status(414).send("URI Too Long: 100 characters or less");
+	if (queryProp.length > 43) return res.status(414).send("URI Too Long: 43 characters or less");
 
 	for (const p of queryProp.split(",")) {
 		if (p.length < 1 || p.length > 10)
@@ -434,7 +438,7 @@ app.get("/api/data/:queryProp/primeForm/:querySearch", (req, res) => {
 	if (!dataCache) return res.sendStatus(500);
 
 	const { queryProp } = req.params;
-	if (queryProp.length > 100) return res.status(414).send("URI Too Long: 100 characters or less");
+	if (queryProp.length > 43) return res.status(414).send("URI Too Long: 43 characters or less");
 
 	for (const p of queryProp.split(",")) {
 		if (p.length < 1 || p.length > 10)
@@ -519,7 +523,7 @@ app.get("/api/data/:queryProp/vec/:querySearch", (req, res) => {
 	if (!dataCache) return res.sendStatus(500);
 
 	const { queryProp } = req.params;
-	if (queryProp.length > 100) return res.status(414).send("URI Too Long: 100 characters or less");
+	if (queryProp.length > 43) return res.status(414).send("URI Too Long: 43 characters or less");
 
 	for (const p of queryProp.split(",")) {
 		if (p.length < 1 || p.length > 10)
@@ -607,7 +611,7 @@ app.get("/api/data/:queryProp/vec/:querySearch/:queryInequality", (req, res) => 
 	if (!dataCache) return res.sendStatus(500);
 
 	const { queryProp } = req.params;
-	if (queryProp.length > 100) return res.status(414).send("URI Too Long: 100 characters or less");
+	if (queryProp.length > 43) return res.status(414).send("URI Too Long: 43 characters or less");
 
 	for (const p of queryProp.split(",")) {
 		if (p.length < 1 || p.length > 10)
@@ -693,7 +697,7 @@ app.get("/api/data/:queryProp/z/:querySearch", (req, res) => {
 	if (!dataCache) return res.sendStatus(500);
 
 	const { queryProp } = req.params;
-	if (queryProp.length > 100) return res.status(414).send("URI Too Long: 100 characters or less");
+	if (queryProp.length > 43) return res.status(414).send("URI Too Long: 43 characters or less");
 
 	for (const p of queryProp.split(",")) {
 		if (p.length < 1 || p.length > 10)
@@ -774,7 +778,7 @@ app.get("/api/data/:queryProp/complement/:querySearch", (req, res) => {
 	if (!dataCache) return res.sendStatus(500);
 
 	const { queryProp } = req.params;
-	if (queryProp.length > 100) return res.status(414).send("URI Too Long: 100 characters or less");
+	if (queryProp.length > 43) return res.status(414).send("URI Too Long: 43 characters or less");
 
 	for (const p of queryProp.split(",")) {
 		if (p.length < 1 || p.length > 10)
@@ -857,7 +861,7 @@ app.get("/api/data/:queryProp/inversion/:querySearch", (req, res) => {
 	if (!dataCache) return res.sendStatus(500);
 
 	const { queryProp } = req.params;
-	if (queryProp.length > 100) return res.status(414).send("URI Too Long: 100 characters or less");
+	if (queryProp.length > 43) return res.status(414).send("URI Too Long: 43 characters or less");
 
 	for (const p of queryProp.split(",")) {
 		if (p.length < 1 || p.length > 10)
