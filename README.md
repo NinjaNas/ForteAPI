@@ -27,6 +27,7 @@ Forte API is a music theory API that provides a way to query set classes in 12 t
 
 ## Table of Contents
 
+- [App Example](app-example)
 - [What are Forte Numbers? and More!](#what-are-forte-numbers-and-more)
   - [Set Theory](#set-theory)
   - [Prime Form](#prime-form)
@@ -35,6 +36,7 @@ Forte API is a music theory API that provides a way to query set classes in 12 t
   - [Complements](#complements)
 - [Should I use this API?](#should-i-use-this-api)
 - [DataSet Type](#dataset-type)
+- [Status Codes](#status-codes)
 - [Endpoints](#endpoints)
   - [GET /api/data/](#get-apidata)
   - [GET /api/data/:queryProp/](#get-apidataqueryprop)
@@ -118,11 +120,13 @@ Forte API is a music theory API that provides a way to query set classes in 12 t
      	- [Dag](#dag)
     - [How to Use JSON in D3Dag](#how-to-use-json-in-d3dag)
     - [Endpoints](#endpoints)
-- [Using this API in your app](#using-this-api-in-your-app)
-  - [Simple Client-Side Validation](#simple-client-side-validation)
 - [API Development](#api-development)
   - [Add .env File](#add-env-file)
 - [Star This Repo](#star-this-repo)
+
+## App Example
+
+Check out my app [set-class-visualizer](https://github.com/NinjaNas/set-class-visualizer) using ForteAPI to serve its data and dags!
 
 ## What are Forte Numbers? and More!
 
@@ -205,6 +209,13 @@ type DataSet = {
 	inversion: null | string;
 }[];
 ```
+
+## Status Codes
+
+500 - Internal Server Error
+414 - URI or Subquery Too Long
+400 - Bad Property / Request Returned Nothing
+200 - Success
 
 ## Endpoints
 
@@ -2345,49 +2356,6 @@ Valid queries are:
   - vectorinversionlinks
   - vectororiginaldag
   - vectororiginallinks
-
-## Using this API in your app
-
-### Simple Client-Side Validation
-
-This is a basic example of how you can implement client-side validation with a max length and regex for the query endpoint.
-
-- Please note, that queries can be formatted correctly but not found thus giving a 400 status code. The main idea of using regex is to prevent the user from hitting the API when their input is invalid.
-
-You can ignore the regex if you do not care if the user might hit the API more often due to invalid input.
-
-```ts
-// Max Length Example: number,primeForm,vec,z,complement
-isDataValidLength = input.length > 33;
-dataRegex = /^((number|primeForm|vec|z|complement)(,(number|primeForm|vec|z|complement))*)$/;
-
-// Max Length Example: 0-1,1-1,2-1,2-2,2-3,2-4,2-5,2-6,3-2A,3-2B,3-3A,3-3B,3-4A,3-4B,3-5A,3-5B,3-6,3-7A,3-7B,3-8A,3-8B,4-2A
-isNumberValidLength = input.length > 100;
-numberRegex =
-	/^(((\^?[1-9]?[0-9]-z?[1-9]?[0-9][AB]?\$?|\^[1-9]?[0-9]|\^[1-9]?[0-9]-|\^[1-9]?[0-9]-z?|\^[1-9]?[0-9]-z?[1-9]?[0-9]|[AB]\$|[1-9]?[0-9][AB]?\$|z?[1-9]?[0-9][AB]?\$|-z?[1-9]?[0-9][AB]?\$)|([1-9]?[0-9]-z?[1-9]?[0-9][AB]?~[1-9]?[0-9]-z?[1-9]?[0-9][AB]?))(,\^?[1-9]?[0-9]-z?[1-9]?[0-9][AB]?\$?|,\^[1-9]?[0-9]|,\^[1-9]?[0-9]-|,\^[1-9]?[0-9]-z?|,\^[1-9]?[0-9]-z?[1-9]?[0-9]|,[AB]\$|,[1-9]?[0-9][AB]?\$|,z?[1-9]?[0-9][AB]?\$|,-z?[1-9]?[0-9][AB]?\$|,[1-9]?[0-9]-z?[1-9]?[0-9][AB]?~[1-9]?[0-9]-z?[1-9]?[0-9][AB]?)*)$/;
-
-// Max Length Example: [0,1,2,3,4,5,6,7,8,9,T,E]
-isNumberValidLength = input.length > 25;
-primeFormRegex =
-	/^(\[(0)?(,1)?(,2)?(,3)?(,4)?(,5)?(,6)?(,7)?(,8)?(,9)?(,T)?(,E)?]|(?!._(.)._\14)[0-9TE]{1,12})$/;
-
-// Max Length Example: <1,1,1,1,1,1>
-isVecValidLength = input.length > 13;
-vecRegex = /^<[0-9TEC],[0-9TEC],[0-9TEC],[0-9TEC],[0-9TEC],[0-9TEC]>|[0-9TECX]{6,6}$/;
-
-// Max Length Example: ^4-z15A$
-isZValidLength = input.length > 8;
-zRegex =
-	/^(null|\^?[1-9]?[0-9]-z[1-9]?[0-9][AB]?\$?|\^[1-9]?[0-9]|\^[1-9]?[0-9]-|\^[1-9]?[0-9]-z|\^[1-9]?[0-9]-z[1-9]?[0-9]|[AB]\$|[1-9]?[0-9][AB]?\$|z[1-9]?[0-9][AB]?\$|-z[1-9]?[0-9][AB]?\$)$/;
-
-// Max Length Example: ^4-z15A$
-isComplementValidLength = input.length > 8;
-complementRegex =
-	/^(null|\^?[1-9]?[0-9]-z?[1-9]?[0-9][AB]?\$?|\^[1-9]?[0-9]|\^[1-9]?[0-9]-|\^[1-9]?[0-9]-z?|\^[1-9]?[0-9]-z?[1-9]?[0-9]|[AB]\$|[1-9]?[0-9][AB]?\$|z?[1-9]?[0-9][AB]?\$|-z?[1-9]?[0-9][AB]?\$)$/;
-
-isD3ValidLength = input.length > 22;
-d3Regex = /^cardinaldagprime|strictdagprime|cardinaldagprimeforte|strictdagprimeforte|cardinallinkprime|strictlinkprime|cardinallinkprimeforte|strictlinkprimeforte$/;
-```
 
 ## API Development
 
