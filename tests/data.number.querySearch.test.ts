@@ -515,6 +515,219 @@ describe("GET /api/data/number/:querySearch", () => {
 			});
 	});
 
+	it("should return 200 and correct data, all inclusion methods no duplicates w/ contains exact instead", done => {
+		chai
+			.request(server)
+			.get("/api/data/number/2-1,2-1~2-2,^3-3,-z50$,@12")
+			.end((err, res) => {
+				should.not.exist(err);
+				res.body.should.deep.equal([
+					{
+						number: "2-1",
+						primeForm: '["0","1"]',
+						vec: "<1,0,0,0,0,0>",
+						z: null,
+						complement: "10-1",
+						inversion: null
+					},
+					{
+						number: "2-2",
+						primeForm: '["0","2"]',
+						vec: "<0,1,0,0,0,0>",
+						z: null,
+						complement: "10-2",
+						inversion: null
+					},
+					{
+						number: "3-3A",
+						primeForm: '["0","1","4"]',
+						vec: "<1,0,1,1,0,0>",
+						z: null,
+						complement: "9-3B",
+						inversion: '["0","3","4"]'
+					},
+					{
+						number: "3-3B",
+						primeForm: '["0","3","4"]',
+						vec: "<1,0,1,1,0,0>",
+						z: null,
+						complement: "9-3A",
+						inversion: '["0","1","4"]'
+					},
+					{
+						number: "6-z50",
+						primeForm: '["0","1","4","6","7","9"]',
+						vec: "<2,2,4,2,3,2>",
+						z: "6-z29",
+						complement: "6-z29",
+						inversion: null
+					},
+					{
+						number: "3-12",
+						primeForm: '["0","4","8"]',
+						vec: "<0,0,0,3,0,0>",
+						z: null,
+						complement: "9-12",
+						inversion: null
+					},
+					{
+						number: "4-12A",
+						primeForm: '["0","2","3","6"]',
+						vec: "<1,1,2,1,0,1>",
+						z: null,
+						complement: "8-12A",
+						inversion: '["0","3","4","6"]'
+					},
+					{
+						number: "4-12B",
+						primeForm: '["0","3","4","6"]',
+						vec: "<1,1,2,1,0,1>",
+						z: null,
+						complement: "8-12B",
+						inversion: '["0","2","3","6"]'
+					},
+					{
+						number: "4-21",
+						primeForm: '["0","2","4","6"]',
+						vec: "<0,3,0,2,0,1>",
+						z: null,
+						complement: "8-21",
+						inversion: null
+					},
+					{
+						number: "5-z12",
+						primeForm: '["0","1","3","5","6"]',
+						vec: "<2,2,2,1,2,1>",
+						z: "5-z36A",
+						complement: "7-z12",
+						inversion: null
+					},
+					{
+						number: "5-21A",
+						primeForm: '["0","1","4","5","8"]',
+						vec: "<2,0,2,4,2,0>",
+						z: null,
+						complement: "7-21B",
+						inversion: '["0","3","4","7","8"]'
+					},
+					{
+						number: "5-21B",
+						primeForm: '["0","3","4","7","8"]',
+						vec: "<2,0,2,4,2,0>",
+						z: null,
+						complement: "7-21A",
+						inversion: '["0","1","4","5","8"]'
+					},
+					{
+						number: "6-z12A",
+						primeForm: '["0","1","2","4","6","7"]',
+						vec: "<3,3,2,2,3,2>",
+						z: "6-z41A",
+						complement: "6-z41B",
+						inversion: '["0","1","3","5","6","7"]'
+					},
+					{
+						number: "6-z12B",
+						primeForm: '["0","1","3","5","6","7"]',
+						vec: "<3,3,2,2,3,2>",
+						z: "6-z41A",
+						complement: "6-z41A",
+						inversion: '["0","1","2","4","6","7"]'
+					},
+					{
+						number: "6-21A",
+						primeForm: '["0","2","3","4","6","8"]',
+						vec: "<2,4,2,4,1,2>",
+						z: null,
+						complement: null,
+						inversion: '["0","2","4","5","6","8"]'
+					},
+					{
+						number: "6-21B",
+						primeForm: '["0","2","4","5","6","8"]',
+						vec: "<2,4,2,4,1,2>",
+						z: null,
+						complement: null,
+						inversion: '["0","2","3","4","6","8"]'
+					},
+					{
+						number: "7-z12",
+						primeForm: '["0","1","2","3","4","7","9"]',
+						vec: "<4,4,4,3,4,2>",
+						z: "7-z36A",
+						complement: "5-z12",
+						inversion: null
+					},
+					{
+						number: "7-21A",
+						primeForm: '["0","1","2","4","5","8","9"]',
+						vec: "<4,2,4,6,4,1>",
+						z: null,
+						complement: "5-21B",
+						inversion: '["0","1","3","4","5","8","9"]'
+					},
+					{
+						number: "7-21B",
+						primeForm: '["0","1","3","4","5","8","9"]',
+						vec: "<4,2,4,6,4,1>",
+						z: null,
+						complement: "5-21A",
+						inversion: '["0","1","2","4","5","8","9"]'
+					},
+					{
+						number: "8-12A",
+						primeForm: '["0","1","3","4","5","6","7","9"]',
+						vec: "<5,5,6,5,4,3>",
+						z: null,
+						complement: "4-12A",
+						inversion: '["0","2","3","4","5","6","8","9"]'
+					},
+					{
+						number: "8-12B",
+						primeForm: '["0","2","3","4","5","6","8","9"]',
+						vec: "<5,5,6,5,4,3>",
+						z: null,
+						complement: "4-12B",
+						inversion: '["0","1","3","4","5","6","7","9"]'
+					},
+					{
+						number: "8-21",
+						primeForm: '["0","1","2","3","4","6","8","T"]',
+						vec: "<4,7,4,6,4,3>",
+						z: null,
+						complement: "4-21",
+						inversion: null
+					},
+					{
+						number: "9-12",
+						primeForm: '["0","1","2","4","5","6","8","9","T"]',
+						vec: "<6,6,6,9,6,3>",
+						z: null,
+						complement: "3-12",
+						inversion: null
+					},
+					{
+						number: "10-2",
+						primeForm: '["0","1","2","3","4","5","6","7","8","T"]',
+						vec: "<8,9,8,8,8,4>",
+						z: null,
+						complement: "2-2",
+						inversion: null
+					},
+					{
+						number: "12-1",
+						primeForm: '["0","1","2","3","4","5","6","7","8","9","T","E"]',
+						vec: "<C,C,C,C,C,6>",
+						z: null,
+						complement: "0-1",
+						inversion: null
+					}
+				]);
+				res.should.have.status(200);
+				done();
+			});
+	});
+
 	it("should return 200 and correct data, most exclusion methods no duplicates", done => {
 		chai
 			.request(server)

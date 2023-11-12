@@ -274,6 +274,35 @@ describe("GET /api/data/:queryProp/primeForm/:querySearch", () => {
 			});
 	});
 
+	it("should return 200 and correct data, contains exact order matters, number+primeForm+vec+z+complement+inversion", done => {
+		chai
+			.request(server)
+			.get("/api/data/number,primeForm,vec,z,complement,inversion/primeForm/*012345679")
+			.end((err, res) => {
+				should.not.exist(err);
+				res.body.should.deep.equal([
+					{
+						number: "9-2A",
+						primeForm: '["0","1","2","3","4","5","6","7","9"]',
+						vec: "<7,7,7,6,6,3>",
+						z: null,
+						complement: "3-2A",
+						inversion: '["0","2","3","4","5","6","7","8","9"]'
+					},
+					{
+						number: "10-3",
+						primeForm: '["0","1","2","3","4","5","6","7","9","T"]',
+						vec: "<8,8,9,8,8,4>",
+						z: null,
+						complement: "2-3",
+						inversion: null
+					}
+				]);
+				res.should.have.status(200);
+				done();
+			});
+	});
+
 	it("should return 200 and correct data, `, !^, and `$, primeForm", done => {
 		chai
 			.request(server)
