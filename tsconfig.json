@@ -1,4 +1,8 @@
 {
+	"ts-node": {
+		"files": true
+	},
+	"files": ["src/index.ts", "types/global.d.ts"],
 	"compilerOptions": {
 		"module": "commonjs",
 		"esModuleInterop": true,
@@ -13,6 +17,7 @@
 			"*": ["node_modules/*"]
 		}
 	},
-	"exclude": ["./tests/", "./node_modules/", "./dist/"],
-	"include": ["src/**/*.ts"]
+	"exclude": ["./node_modules/", "./dist/", "tests/**/*.ts"],
+	"include": ["src/**/*.ts", "types/**/*.d.ts"]
+	// "include": ["src/**/*.ts", "types/**/*.d.ts", "tests/**/*.ts"] for dev
 }

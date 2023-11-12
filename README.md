@@ -16,10 +16,6 @@ Forte API is a music theory API that provides a way to query set classes in 12 t
 
 ##
 
-**Update Version 1.3.0 is done (functionality-wise) and is live on AWS, however, the README and SwaggerDoc still needs to be updated, plus additional testing is needed for stability and integrity**
-
-**This API is going through an overhaul of the endpoints and functionalities, please wait until v1.3.0 before using! Thank You! :)**
-
 **Currently this API is live [here](https://hcda8f8dtk.execute-api.us-east-1.amazonaws.com/prod/api/data/) using AWS API Gateway + AWS Lambda!**
 **Check out the OpenAPI docs on SwaggerHub [here](https://app.swaggerhub.com/apis-docs/NinjaNas/ForteAPI/1.2.1)!**
 
@@ -31,6 +27,7 @@ Forte API is a music theory API that provides a way to query set classes in 12 t
 
 ## Table of Contents
 
+- [App Example](app-example)
 - [What are Forte Numbers? and More!](#what-are-forte-numbers-and-more)
   - [Set Theory](#set-theory)
   - [Prime Form](#prime-form)
@@ -39,48 +36,97 @@ Forte API is a music theory API that provides a way to query set classes in 12 t
   - [Complements](#complements)
 - [Should I use this API?](#should-i-use-this-api)
 - [DataSet Type](#dataset-type)
+- [Status Codes](#status-codes)
 - [Endpoints](#endpoints)
-  - [GET /api/data](#get-apidata)
-  - [GET /api/data/:prop/](#get-apidataprop)
-  - [GET /api/flatdata/:prop/](#get-apiflatdataprop)
+  - [GET /api/data/](#get-apidata)
+  - [GET /api/data/:queryProp/](#get-apidataqueryprop)
+  - [GET /api/flatdata/:queryprop/](#get-apiflatdataqueryprop)
     - [number](#number)
     - [primeForm](#primeform)
     - [vec](#vec)
     - [z](#z)
     - [complement](#complement)
-  - [GET /api/data/number/:query](#get-apidatanumberquery)
+    - [inversion](#inversion)
+  - [GET /api/hashdata/:queryPropKey/:queryPropValue/](#get-apihashdataquerypropkeyquerypropvalue)
+  - [GET /api/data/number/:querySearch/](#get-apidatanumberquerysearch)
     - [Exact Search](#exact-search)
     - [Starts With Search](#starts-with-search)
     - [Ends With Search](#ends-with-search)
-    - [Range Search](#range-search-inclusive)
+    - [Contains Search](#contains-search)
+    - [Substring Search](#substring-search)
+    - [Not Search](#not-search)
+    - [Exclude Search](#exclude-search)
     - [Chaining Methods](#chaining-methods-no-duplicates)
-  - [GET /api/data/primeForm/:query](#get-apidataprimeformquery)
+  - [GET /api/data/primeForm/:querySearch/](#get-apidataprimeformquerysearch)
     - [Exact Search](#exact-search-1)
-    - [Fuzzy Search / Superset Search](#fuzzy-search--superset-search)
-  - [GET /api/data/vec/:query](#get-apidatavecquery)
-    - [Exact Search](#exact-search-2)
-    - [Wildcard Search](#wildcard-search)
-  - [GET /api/data/z/:query](#get-apidatazquery)
-    - [Exact Search](#exact-search-3)
     - [Starts With Search](#starts-with-search-1)
     - [Ends With Search](#ends-with-search-1)
-  - [GET /api/data/complement/:query](#get-apidatacomplementquery)
-    - [Exact Search](#exact-search-4)
+    - [Contains Search](#contains-search-1)
+    - [Substring Search](#substring-search-1)
+    - [Not Search](#not-search-1)
+    - [Exclude Search](#exclude-search-1)
+    - [Chaining Methods](#chaining-methods-no-duplicates-1)
+  - [GET /api/data/vec/:querySearch/](#get-apidatavecquerysearch)
+    - [Exact Search](#exact-search-2)
     - [Starts With Search](#starts-with-search-2)
     - [Ends With Search](#ends-with-search-2)
-  - [GET /api/data/d3/:query](#get-apidatad3query)
+    - [Contains Search](#contains-search-2)
+    - [Substring Search](#substring-search-2)
+    - [Not Search](#not-search-2)
+    - [Exclude Search](#exclude-search-2)
+    - [Chaining Methods](#chaining-methods-no-duplicates-2)
+  - [GET /api/data/vec/:querySearch/:queryInequality](#get-apidatavecquerysearchqueryinequality)
+    - [Equal Search](#equal-search)
+    - [Less Than Search](#less-than-search)
+    - [Less Than Or Equal To Search](#less-than-or-equal-to-search)
+    - [Greater Than Search](#greater-than-search)
+    - [Greater Than Or Equal To Search](#greater-than-or-equal-to-search)
+  - [GET /api/data/z/:querySearch/](#get-apidatazquerysearch)
+    - [Exact Search](#exact-search-3)
+    - [Starts With Search](#starts-with-search-3)
+    - [Ends With Search](#ends-with-search-3)
+    - [Contains Search](#contains-search-3)
+    - [Substring Search](#substring-search-3)
+    - [Not Search](#not-search-3)
+    - [Exclude Search](#exclude-search-3)
+    - [Chaining Methods](#chaining-methods-no-duplicates-3)
+  - [GET /api/data/complement/:querySearch/](#get-apidatacomplementquerysearch)
+    - [Exact Search](#exact-search-4)
+    - [Starts With Search](#starts-with-search-4)
+    - [Ends With Search](#ends-with-search-4)
+    - [Contains Search](#contains-search-4)
+    - [Substring Search](#substring-search-4)
+    - [Not Search](#not-search-4)
+    - [Exclude Search](#exclude-search-4)
+    - [Chaining Methods](#chaining-methods-no-duplicates-4)
+  - [GET /api/data/inversion/:querySearch/](#get-apidatainversionquerysearch)
+    - [Exact Search](#exact-search-5)
+    - [Starts With Search](#starts-with-search-5)
+    - [Ends With Search](#ends-with-search-5)
+    - [Contains Search](#contains-search-5)
+    - [Substring Search](#substring-search-5)
+    - [Not Search](#not-search-5)
+    - [Exclude Search](#exclude-search-5)
+    - [Chaining Methods](#chaining-methods-no-duplicates-5)
+  - [GET /api/data/:queryProp/PROPERTY/querySearch](#get-apidataqueryproppropertyquerysearch)
+    - [Endpoints](#endpoints-1) 
+  - [GET /api/data/d3/:querySearch/](#get-apidatad3querysearch)
     - [Types](#types)
     - [Cardinality-Increasing vs Strict-Increasing](#cardinality-increasing-vs-strict-increasing)
+    - [Vector-Similarity](#vector-similarity)
+    - [Original vs Inversion](#original-vs-inversion)
     - [Manual Construction](#manual-construction)
     	- [Links](#links)
      	- [Dag](#dag)
     - [How to Use JSON in D3Dag](#how-to-use-json-in-d3dag)
     - [Endpoints](#endpoints)
-- [Using this API in your app](#using-this-api-in-your-app)
-  - [Simple Client-Side Validation](#simple-client-side-validation)
 - [API Development](#api-development)
   - [Add .env File](#add-env-file)
 - [Star This Repo](#star-this-repo)
+
+## App Example
+
+Check out my app [set-class-visualizer](https://github.com/NinjaNas/set-class-visualizer) using ForteAPI to serve its data and dags!
 
 ## What are Forte Numbers? and More!
 
@@ -120,7 +166,7 @@ The labels are structured by cardinality-ordinal number.
 - Ex. 3-6 meaning the 6th set in order of sets containing 3 pitch classes/notes.
 - In general the smaller the ordinal number the more compact the set is.
 
-If there is A or B appended to the end it means that set has a distinct inversion, where A is given to the most compact version. Both A and B share the same interval vector
+Allen Forte did not differentiate between inversions in his book so 3-11A and 3-11B would just be 3-11 using 3-11A as its most compact form. Later on, notation was made to differentiate between inversions. If there is A or B appended to the end it means that set has a distinct inversion, where A is given to the most compact version. Both A and B sets share the same interval vector.
 
 - Ex. 3-11A and 3-11B
 - 3-11A has a prime form of {0,3,7} and 3-11B has a prime form of {0,3,7}
@@ -160,40 +206,51 @@ type DataSet = {
 	vec: string;
 	z: null | string;
 	complement: null | string;
-};
+	inversion: null | string;
+}[];
 ```
+
+## Status Codes
+
+500 - Internal Server Error
+414 - URI or Subquery Too Long
+400 - Bad Property / Request Returned Nothing
+200 - Success
 
 ## Endpoints
 
-### GET /api/data
+### GET /api/data/
 
 The endpoint returns all of the data from [/data/set-classes.json](https://github.com/NinjaNas/ForteAPI/blob/main/data/set_classes.json)
 
 ```ts
 [
-	{
-		number: "0-1",
-		primeForm: '[""]',
-		vec: "<0,0,0,0,0,0>",
-		z: null,
-		complement: "12-1"
-	},
-	  ...
-	{
-		number: "12-1",
-		primeForm: '["0","1","2","3","4","5","6","7","8","9","T","E"]',
-		vec: "<C,C,C,C,C,6>",
-		z: null,
-		complement: "0-1"
-	}
+  {
+    "number": "0-1",
+    "primeForm": "[\"\"]",
+    "vec": "<0,0,0,0,0,0>",
+    "z": null,
+    "complement": "12-1",
+    "inversion": null
+  },
+    ...
+  {
+    "number": "12-1",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\",\"T\",\"E\"]",
+    "vec": "<C,C,C,C,C,6>",
+    "z": null,
+    "complement": "0-1",
+    "inversion": null
+  }
 ];
 ```
 
-### GET /api/data/:prop/
+### GET /api/data/:queryProp/
 
-The endpoint returns the full data given the properties provided in a comma separated list (number, primeForm, vec, z, complement)
+The endpoint returns the full data given the properties provided in a comma separated list (number, primeForm, vec, z, complement, inversion)
 
-- Max URI length: No more than 33 characters
+- Max URI length: No more than 43 characters
+- Subquery length: 1-10 characters
 
 ```ts
 // GET /api/data/number
@@ -211,19 +268,21 @@ The endpoint returns the full data given the properties provided in a comma sepa
 [
   {
     "number": "0-1"
-    "primeForm": '[""]'
+    "primeForm": "[\"\"]",
   },
     ...
   {
     "number": "12-1"
-    "primeForm": '["0","1","2","3","4","5","6","7","8","9","T","E"]'
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\",\"T\",\"E\"]"
   },
 ];
 ```
 
-### GET /api/flatdata/:prop/
+### GET /api/flatdata/:queryProp/
 
-The endpoint returns a flatmap of the valid properties (number, primeForm, vec, z, complement)
+The endpoint returns a flatmap of the valid properties (number, primeForm, vec, z, complement, inversion)
+
+- Max URI length: No more than 10 characters
 
 #### number
 
@@ -236,7 +295,7 @@ The endpoint returns a flatmap of the valid properties (number, primeForm, vec, 
 
 ```ts
 // GET /api/flatdata/primeForm
-['[""]', ..., '["0","1","2","3","4","5","6","7","8","9","T","E"]'];
+["[\"\"]", ..., "[\"0\",\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\",\"T\",\"E\"]"];
 ```
 
 #### vec
@@ -259,25 +318,51 @@ The endpoint returns a flatmap of the valid properties (number, primeForm, vec, 
 // GET /api/flatdata/complement
 ["12-1", ..., "0-1"];
 ```
+#### inversion
 
-### GET /api/data/number/:query
+```ts
+// GET /api/flatdata/inversion
+["null", ..., "[\"0\",\"2\",\"5\",\"6\"]", ..., "null"];
+```
+
+
+### GET /api/hashdata/:queryPropKey/:queryPropValue/
+
+The endpoint returns a hashmap with two the valid properties (number, primeForm, vec, z, complement, inversion)
+
+- Max URI length For Both Queries: No more than 10 characters
+
+```ts
+// GET /api/hashdata/number/primeForm
+{
+  "0-1": "[\"\"]",
+    ...
+  "12-1": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\",\"T\",\"E\"]"
+};
+```
+
+
+### GET /api/data/number/:querySearch/
 
 The endpoint returns an array of objects based on the query on the number property
 
 - Max URI length: No more than 100 characters
+- Subquery length: 2-15 characters
+	- Ex. ^1 or !`6-z25A~6-z25B
 
 #### Exact Search
 
 ```ts
-// GET /api/data/number/1-1 or GET /api/data/number/^1-1$
+// GET /api/data/number/1-1
 [
-	{
-		number: "1-1",
-		primeForm: '["0"]',
-		vec: "<0,0,0,0,0,0>",
-		z: null,
-		complement: "11-1"
-	}
+  {
+    "number": "1-1",
+    "primeForm": "[\"0\"]",
+    "vec": "<0,0,0,0,0,0>",
+    "z": null,
+    "complement": "11-1",
+    "inversion": null
+  }
 ];
 ```
 
@@ -286,20 +371,22 @@ The endpoint returns an array of objects based on the query on the number proper
 ```ts
 // GET /api/data/number/^4-z15
 [
-	{
-		number: "4-z15A",
-		primeForm: '["0","1","4","6"]',
-		vec: "<1,1,1,1,1,1>",
-		z: "4-z29A",
-		complement: "8-z15B"
-	},
-	{
-		number: "4-z15B",
-		primeForm: '["0","2","5","6"]',
-		vec: "<1,1,1,1,1,1>",
-		z: "4-z29A",
-		complement: "8-z15A"
-	}
+  {
+    "number": "4-z15A",
+    "primeForm": "[\"0\",\"1\",\"4\",\"6\"]",
+    "vec": "<1,1,1,1,1,1>",
+    "z": "4-z29A",
+    "complement": "8-z15B",
+    "inversion": "[\"0\",\"2\",\"5\",\"6\"]"
+  },
+  {
+    "number": "4-z15B",
+    "primeForm": "[\"0\",\"2\",\"5\",\"6\"]",
+    "vec": "<1,1,1,1,1,1>",
+    "z": "4-z29A",
+    "complement": "8-z15A",
+    "inversion": "[\"0\",\"1\",\"4\",\"6\"]"
+  }
 ];
 ```
 
@@ -308,168 +395,501 @@ The endpoint returns an array of objects based on the query on the number proper
 ```ts
 // GET /api/data/number/-z50$
 [
-	{
-		number: "6-z50",
-		primeForm: '["0","1","4","6","7","9"]',
-		vec: "<2,2,4,2,3,2>",
-		z: "6-z29",
-		complement: "6-z29"
-	}
+  {
+    "number": "6-z50",
+    "primeForm": "[\"0\",\"1\",\"4\",\"6\",\"7\",\"9\"]",
+    "vec": "<2,2,4,2,3,2>",
+    "z": "6-z29",
+    "complement": "6-z29",
+    "inversion": null
+  }
+];
+```
+
+#### Contains Search
+
+```ts
+// GET /api/data/number/@12A or GET /api/data/number/@21A
+[
+  {
+    "number": "4-12A",
+    "primeForm": "[\"0\",\"2\",\"3\",\"6\"]",
+    "vec": "<1,1,2,1,0,1>",
+    "z": null,
+    "complement": "8-12A",
+    "inversion": "[\"0\",\"3\",\"4\",\"6\"]"
+  },
+  {
+    "number": "5-21A",
+    "primeForm": "[\"0\",\"1\",\"4\",\"5\",\"8\"]",
+    "vec": "<2,0,2,4,2,0>",
+    "z": null,
+    "complement": "7-21B",
+    "inversion": "[\"0\",\"3\",\"4\",\"7\",\"8\"]"
+  },
+  {
+    "number": "6-z12A",
+    "primeForm": "[\"0\",\"1\",\"2\",\"4\",\"6\",\"7\"]",
+    "vec": "<3,3,2,2,3,2>",
+    "z": "6-z41A",
+    "complement": "6-z41B",
+    "inversion": "[\"0\",\"1\",\"3\",\"5\",\"6\",\"7\"]"
+  },
+  {
+    "number": "6-21A",
+    "primeForm": "[\"0\",\"2\",\"3\",\"4\",\"6\",\"8\"]",
+    "vec": "<2,4,2,4,1,2>",
+    "z": null,
+    "complement": null,
+    "inversion": "[\"0\",\"2\",\"4\",\"5\",\"6\",\"8\"]"
+  },
+  {
+    "number": "7-21A",
+    "primeForm": "[\"0\",\"1\",\"2\",\"4\",\"5\",\"8\",\"9\"]",
+    "vec": "<4,2,4,6,4,1>",
+    "z": null,
+    "complement": "5-21B",
+    "inversion": "[\"0\",\"1\",\"3\",\"4\",\"5\",\"8\",\"9\"]"
+  },
+  {
+    "number": "8-12A",
+    "primeForm": "[\"0\",\"1\",\"3\",\"4\",\"5\",\"6\",\"7\",\"9\"]",
+    "vec": "<5,5,6,5,4,3>",
+    "z": null,
+    "complement": "4-12A",
+    "inversion": "[\"0\",\"2\",\"3\",\"4\",\"5\",\"6\",\"8\",\"9\"]"
+  }
+];
+```
+
+#### Substring Search
+
+```ts
+// GET /api/data/number/*12A
+[
+  {
+    "number": "4-12A",
+    "primeForm": "[\"0\",\"2\",\"3\",\"6\"]",
+    "vec": "<1,1,2,1,0,1>",
+    "z": null,
+    "complement": "8-12A",
+    "inversion": "[\"0\",\"3\",\"4\",\"6\"]"
+  },
+  {
+    "number": "6-z12A",
+    "primeForm": "[\"0\",\"1\",\"2\",\"4\",\"6\",\"7\"]",
+    "vec": "<3,3,2,2,3,2>",
+    "z": "6-z41A",
+    "complement": "6-z41B",
+    "inversion": "[\"0\",\"1\",\"3\",\"5\",\"6\",\"7\"]"
+  },
+  {
+    "number": "8-12A",
+    "primeForm": "[\"0\",\"1\",\"3\",\"4\",\"5\",\"6\",\"7\",\"9\"]",
+    "vec": "<5,5,6,5,4,3>",
+    "z": null,
+    "complement": "4-12A",
+    "inversion": "[\"0\",\"2\",\"3\",\"4\",\"5\",\"6\",\"8\",\"9\"]"
+  }
 ];
 ```
 
 #### Range Search (inclusive)
 
+The only filtering methods that you can use with range search are \` and ! (which is also !\`).
+  - Ex: \`1-1\~2-1, !1-1\~2-1, !\`1-1\~2-1
+
 ```ts
 // GET /api/data/number/1-1~2-1
 // WARNING: 1-1~1-1 is invalid and will send a 400 status code, use 1-1 instead
 [
-	{
-		number: "1-1",
-		primeForm: '["0"]',
-		vec: "<0,0,0,0,0,0>",
-		z: null,
-		complement: "11-1"
-	},
-	{
-		number: "2-1",
-		primeForm: '["0","1"]',
-		vec: "<1,0,0,0,0,0>",
-		z: null,
-		complement: "10-1"
-	}
+  {
+    "number": "1-1",
+    "primeForm": "[\"0\"]",
+    "vec": "<0,0,0,0,0,0>",
+    "z": null,
+    "complement": "11-1",
+    "inversion": null
+  },
+  {
+    "number": "2-1",
+    "primeForm": "[\"0\",\"1\"]",
+    "vec": "<1,0,0,0,0,0>",
+    "z": null,
+    "complement": "10-1",
+    "inversion": null
+  }
+];
+```
+
+#### Not Search
+
+- Works with !1-1, !^1-1, !1-1$, !@A, !*A, !1-1~2-2
+  - ! is equivalent to !` 
+  - `! is not a valid search method
+
+```ts
+// GET /api/data/number/!1-1
+[
+  {
+    "number": "1-1",
+    "primeForm": "[\"0\"]",
+    "vec": "<0,0,0,0,0,0>",
+    "z": null,
+    "complement": "11-1",
+    "inversion": null
+  },
+    ...,
+  {
+    "number": "12-1",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\",\"T\",\"E\"]",
+    "vec": "<C,C,C,C,C,6>",
+    "z": null,
+    "complement": "0-1",
+    "inversion": null
+  }
+];
+```
+
+#### Exclude Search
+
+- Works with \`1-1, \`^1-1, \`1-1$, \`@A, \`*A, \`1-1~2-2
+
+```ts
+// GET /api/data/number/1-1~2-4,`1-1~2-2
+[
+  {
+    "number": "2-3",
+    "primeForm": "[\"0\",\"3\"]",
+    "vec": "<0,0,1,0,0,0>",
+    "z": null,
+    "complement": "10-3",
+    "inversion": null
+  },
+  {
+    "number": "2-4",
+    "primeForm": "[\"0\",\"4\"]",
+    "vec": "<0,0,0,1,0,0>",
+    "z": null,
+    "complement": "10-4",
+    "inversion": null
+  }
 ];
 ```
 
 #### Chaining Methods (no duplicates)
 
 ```ts
-// chaining methods (no duplicates):
-// GET /api/data/number/1-1,^1-1$,^4-z15,-z50$,1-1~2-1
+// GET /api/data/number/1-1,^4-z15,-z50$,1-1~2-1,`4-z15B
 [
-	{
-		number: "1-1",
-		primeForm: '["0"]',
-		vec: "<0,0,0,0,0,0>",
-		z: null,
-		complement: "11-1"
-	},
-	{
-		number: "4-z15A",
-		primeForm: '["0","1","4","6"]',
-		vec: "<1,1,1,1,1,1>",
-		z: "4-z29A",
-		complement: "8-z15B"
-	},
-	{
-		number: "4-z15B",
-		primeForm: '["0","2","5","6"]',
-		vec: "<1,1,1,1,1,1>",
-		z: "4-z29A",
-		complement: "8-z15A"
-	},
-	{
-		number: "6-z50",
-		primeForm: '["0","1","4","6","7","9"]',
-		vec: "<2,2,4,2,3,2>",
-		z: "6-z29",
-		complement: "6-z29"
-	},
-	{
-		number: "2-1",
-		primeForm: '["0","1"]',
-		vec: "<1,0,0,0,0,0>",
-		z: null,
-		complement: "10-1"
-	}
+  {
+    "number": "1-1",
+    "primeForm": "[\"0\"]",
+    "vec": "<0,0,0,0,0,0>",
+    "z": null,
+    "complement": "11-1",
+    "inversion": null
+  },
+  {
+    "number": "4-z15A",
+    "primeForm": "[\"0\",\"1\",\"4\",\"6\"]",
+    "vec": "<1,1,1,1,1,1>",
+    "z": "4-z29A",
+    "complement": "8-z15B",
+    "inversion": "[\"0\",\"2\",\"5\",\"6\"]"
+  },
+  {
+    "number": "6-z50",
+    "primeForm": "[\"0\",\"1\",\"4\",\"6\",\"7\",\"9\"]",
+    "vec": "<2,2,4,2,3,2>",
+    "z": "6-z29",
+    "complement": "6-z29",
+    "inversion": null
+  },
+  {
+    "number": "2-1",
+    "primeForm": "[\"0\",\"1\"]",
+    "vec": "<1,0,0,0,0,0>",
+    "z": null,
+    "complement": "10-1",
+    "inversion": null
+  }
 ];
 ```
 
-### GET /api/data/primeForm/:query
+### GET /api/data/primeForm/:querySearch/
 
 The endpoint returns an array of objects based on the query on the primeForm property
 
-- Max URI length: No more than 25 characters
+Use T for 10, E for 11, and C for 12.
+
+- Max URI length: No more than 100 characters
+- Subquery length: 2-14 characters
+	- Ex. ^0 or !`0123456789TE
 
 #### Exact Search
 
 ```ts
-// GET /api/data/primeForm/[0,1,2,3,4,5,6,7,8,9,T,E]
-// WARNING: AWS will not process "[" and "]" you will need to use percent encoding with %5B and %5D respectively
-// GET /api/data/primeForm/%5B0,1,2,3,4,5,6,7,8,9,T,E%5D
+// GET /api/data/primeForm/0123
 [
-	{
-		number: "12-1",
-		primeForm: '["0","1","2","3","4","5","6","7","8","9","T","E"]',
-		vec: "<C,C,C,C,C,6>",
-		z: null,
-		complement: "0-1"
-	}
+  {
+    "number": "4-1",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\"]",
+    "vec": "<3,2,1,0,0,0>",
+    "z": null,
+    "complement": "8-1",
+    "inversion": null
+  }
 ];
 ```
 
-#### Fuzzy Search / Superset Search
+#### Starts With Search
 
 ```ts
-// GET /api/data/primeForm/0123456789T or GET /api/data/primeForm/1023456789TT
-// input is allowed in any order and with duplicates
+// GET /api/data/primeForm/^0356
 [
-	{
-		number: "11-1",
-		primeForm: '["0","1","2","3","4","5","6","7","8","9","T"]',
-		vec: "<T,T,T,T,T,5>",
-		z: null,
-		complement: "1-1"
-	},
-	{
-		number: "12-1",
-		primeForm: '["0","1","2","3","4","5","6","7","8","9","T","E"]',
-		vec: "<C,C,C,C,C,6>",
-		z: null,
-		complement: "0-1"
-	}
+  {
+    "number": "4-13B",
+    "primeForm": "[\"0\",\"3\",\"5\",\"6\"]",
+    "vec": "<1,1,2,0,1,1>",
+    "z": null,
+    "complement": "8-13A",
+    "inversion": "[\"0\",\"1\",\"3\",\"6\"]"
+  },
+  {
+    "number": "5-25B",
+    "primeForm": "[\"0\",\"3\",\"5\",\"6\",\"8\"]",
+    "vec": "<1,2,3,1,2,1>",
+    "z": null,
+    "complement": "7-25A",
+    "inversion": "[\"0\",\"2\",\"3\",\"5\",\"8\"]"
+  },
+  {
+    "number": "5-z36B",
+    "primeForm": "[\"0\",\"3\",\"5\",\"6\",\"7\"]",
+    "vec": "<2,2,2,1,2,1>",
+    "z": "5-z12",
+    "complement": "7-z36A",
+    "inversion": "[\"0\",\"1\",\"2\",\"4\",\"7\"]"
+  },
+  {
+    "number": "6-z40B",
+    "primeForm": "[\"0\",\"3\",\"5\",\"6\",\"7\",\"8\"]",
+    "vec": "<3,3,3,2,3,1>",
+    "z": "6-z11A",
+    "complement": "6-z11A",
+    "inversion": "[\"0\",\"1\",\"2\",\"3\",\"5\",\"8\"]"
+  }
 ];
 ```
 
-### GET /api/data/vec/:query
+#### Ends With Search
+
+```ts
+// GET /api/data/primeForm/2$
+[
+  {
+    "number": "2-2",
+    "primeForm": "[\"0\",\"2\"]",
+    "vec": "<0,1,0,0,0,0>",
+    "z": null,
+    "complement": "10-2",
+    "inversion": null
+  },
+  {
+    "number": "3-1",
+    "primeForm": "[\"0\",\"1\",\"2\"]",
+    "vec": "<2,1,0,0,0,0>",
+    "z": null,
+    "complement": "9-1",
+    "inversion": null
+  }
+];
+```
+
+#### Contains Search
+
+```ts
+// GET /api/data/primeForm/@12346789
+[
+  {
+    "number": "9-5A",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"6\",\"7\",\"8\",\"9\"]",
+    "vec": "<7,6,6,6,7,4>",
+    "z": null,
+    "complement": "3-5B",
+    "inversion": "[\"0\",\"1\",\"2\",\"3\",\"5\",\"6\",\"7\",\"8\",\"9\"]"
+  },
+  {
+    "number": "10-1",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\"]",
+    "vec": "<9,8,8,8,8,4>",
+    "z": null,
+    "complement": "2-1",
+    "inversion": null
+  },
+  {
+    "number": "10-6",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"6\",\"7\",\"8\",\"9\",\"T\"]",
+    "vec": "<8,8,8,8,8,5>",
+    "z": null,
+    "complement": "2-6",
+    "inversion": null
+  },
+  {
+    "number": "11-1",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\",\"T\"]",
+    "vec": "<T,T,T,T,T,5>",
+    "z": null,
+    "complement": "1-1",
+    "inversion": null
+  },
+  {
+    "number": "12-1",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\",\"T\",\"E\"]",
+    "vec": "<C,C,C,C,C,6>",
+    "z": null,
+    "complement": "0-1",
+    "inversion": null
+  }
+];
+```
+
+#### Substring Search
+
+```ts
+// GET /api/data/primeForm/*12346789
+[
+  {
+    "number": "9-5A",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"6\",\"7\",\"8\",\"9\"]",
+    "vec": "<7,6,6,6,7,4>",
+    "z": null,
+    "complement": "3-5B",
+    "inversion": "[\"0\",\"1\",\"2\",\"3\",\"5\",\"6\",\"7\",\"8\",\"9\"]"
+  },
+  {
+    "number": "10-6",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"6\",\"7\",\"8\",\"9\",\"T\"]",
+    "vec": "<8,8,8,8,8,5>",
+    "z": null,
+    "complement": "2-6",
+    "inversion": null
+  }
+];
+```
+
+#### Not Search
+
+- Works with !0, !^0, !0$, !@0, !*0,
+  - ! is equivalent to !` 
+  - `! is not a valid search method
+- Use %20 for whitespace equivalent to the empty array for 0-1  
+
+```ts
+// GET /api/data/primeForm/!%20
+[
+  {
+    "number": "1-1",
+    "primeForm": "[\"0\"]",
+    "vec": "<0,0,0,0,0,0>",
+    "z": null,
+    "complement": "11-1",
+    "inversion": null
+  },
+    ...,
+  {
+    "number": "12-1",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\",\"T\",\"E\"]",
+    "vec": "<C,C,C,C,C,6>",
+    "z": null,
+    "complement": "0-1",
+    "inversion": null
+  }
+];
+```
+
+#### Exclude Search
+
+- Works with \`0, \`^0, \`0$, \`@0, \`*0
+
+```ts
+// GET /api/data/primeForm/01,012,`012
+[
+  {
+    "number": "2-1",
+    "primeForm": "[\"0\",\"1\"]",
+    "vec": "<1,0,0,0,0,0>",
+    "z": null,
+    "complement": "10-1",
+    "inversion": null
+  }
+];
+```
+
+#### Chaining Methods (no duplicates)
+
+```ts
+// GET /api/data/primeForm/%20,^012567,01245$,`@9
+[
+  {
+    "number": "0-1",
+    "primeForm": "[\"\"]",
+    "vec": "<0,0,0,0,0,0>",
+    "z": null,
+    "complement": "12-1",
+    "inversion": null
+  },
+  {
+    "number": "6-z6",
+    "primeForm": "[\"0\",\"1\",\"2\",\"5\",\"6\",\"7\"]",
+    "vec": "<4,2,1,2,4,2>",
+    "z": "6-z38",
+    "complement": "6-z38",
+    "inversion": null
+  },
+  {
+    "number": "7-7B",
+    "primeForm": "[\"0\",\"1\",\"2\",\"5\",\"6\",\"7\",\"8\"]",
+    "vec": "<5,3,2,3,5,3>",
+    "z": null,
+    "complement": "5-7A",
+    "inversion": "[\"0\",\"1\",\"2\",\"3\",\"6\",\"7\",\"8\"]"
+  },
+  {
+    "number": "5-3A",
+    "primeForm": "[\"0\",\"1\",\"2\",\"4\",\"5\"]",
+    "vec": "<3,2,2,2,1,0>",
+    "z": null,
+    "complement": "7-3B",
+    "inversion": "[\"0\",\"1\",\"3\",\"4\",\"5\"]"
+  }
+];
+```
+
+### GET /api/data/vec/:querySearch/
 
 The endpoint returns an array of objects based on the query on the vec property
 
-- Max URI length: No more than 13 characters
+Use T for 10, E for 11, and C for 12.
 
+- Max URI length: No more than 100 characters
+- Subquery length: 2-8 characters
+	- Ex. ^1 or !`000000
+ 
 #### Exact Search
 
 ```ts
-// GET /api/data/vec/<1,1,1,1,1,1>
+// GET /api/data/vec/321000
 [
-	{
-		number: "4-z15A",
-		primeForm: '["0","1","4","6"]',
-		vec: "<1,1,1,1,1,1>",
-		z: "4-z29A",
-		complement: "8-z15B"
-	},
-	{
-		number: "4-z15B",
-		primeForm: '["0","2","5","6"]',
-		vec: "<1,1,1,1,1,1>",
-		z: "4-z29A",
-		complement: "8-z15A"
-	},
-	{
-		number: "4-z29A",
-		primeForm: '["0","1","3","7"]',
-		vec: "<1,1,1,1,1,1>",
-		z: "4-z15A",
-		complement: "8-z29B"
-	},
-	{
-		number: "4-z29B",
-		primeForm: '["0","4","6","7"]',
-		vec: "<1,1,1,1,1,1>",
-		z: "4-z15A",
-		complement: "8-z29A"
-	}
+  {
+    "number": "4-1",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\"]",
+    "vec": "<3,2,1,0,0,0>",
+    "z": null,
+    "complement": "8-1",
+    "inversion": null
+  }
 ];
 ```
 
@@ -479,28 +899,393 @@ The endpoint returns an array of objects based on the query on the vec property
 // GET /api/data/vec/1121X1
 // capital X must be used as the wildcard
 [
-	{
-		number: "4-12A",
-		primeForm: '["0","2","3","6"]'',
-		vec: "<1,1,2,1,0,1>",
-		z: null,
-		complement: "8-12A"
-	},
-	{
-		number: "4-12B",
-		primeForm: '["0","3","4","6"]',
-		vec: "<1,1,2,1,0,1>",
-		z: null,
-		complement: "8-12B"
-	}
+  {
+    "number": "4-12A",
+    "primeForm": "[\"0\",\"2\",\"3\",\"6\"]",
+    "vec": "<1,1,2,1,0,1>",
+    "z": null,
+    "complement": "8-12A",
+    "inversion": "[\"0\",\"3\",\"4\",\"6\"]"
+  },
+  {
+    "number": "4-12B",
+    "primeForm": "[\"0\",\"3\",\"4\",\"6\"]",
+    "vec": "<1,1,2,1,0,1>",
+    "z": null,
+    "complement": "8-12B",
+    "inversion": "[\"0\",\"2\",\"3\",\"6\"]"
+  }
 ];
 ```
 
-### GET /api/data/z/:query
+#### Starts With Search
+
+```ts
+// GET /api/data/vec/^321
+[
+  {
+    "number": "4-1",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\"]",
+    "vec": "<3,2,1,0,0,0>",
+    "z": null,
+    "complement": "8-1",
+    "inversion": null
+  },
+  {
+    "number": "5-5A",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"7\"]",
+    "vec": "<3,2,1,1,2,1>",
+    "z": null,
+    "complement": "7-5B",
+    "inversion": "[\"0\",\"4\",\"5\",\"6\",\"7\"]"
+  },
+  {
+    "number": "5-5B",
+    "primeForm": "[\"0\",\"4\",\"5\",\"6\",\"7\"]",
+    "vec": "<3,2,1,1,2,1>",
+    "z": null,
+    "complement": "7-5A",
+    "inversion": "[\"0\",\"1\",\"2\",\"3\",\"7\"]"
+  }
+];
+```
+
+#### Ends With Search
+
+```ts
+// GET /api/data/vec/0111$
+[
+  {
+    "number": "4-5A",
+    "primeForm": "[\"0\",\"1\",\"2\",\"6\"]",
+    "vec": "<2,1,0,1,1,1>",
+    "z": null,
+    "complement": "8-5B",
+    "inversion": "[\"0\",\"4\",\"5\",\"6\"]"
+  },
+  {
+    "number": "4-5B",
+    "primeForm": "[\"0\",\"4\",\"5\",\"6\"]",
+    "vec": "<2,1,0,1,1,1>",
+    "z": null,
+    "complement": "8-5A",
+    "inversion": "[\"0\",\"1\",\"2\",\"6\"]"
+  }
+];
+```
+
+#### Contains Search
+
+```ts
+// GET /api/data/vec/@3250
+[
+  {
+    "number": "6-1",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"5\"]",
+    "vec": "<5,4,3,2,1,0>",
+    "z": null,
+    "complement": null,
+    "inversion": null
+  },
+  {
+    "number": "6-32",
+    "primeForm": "[\"0\",\"2\",\"4\",\"5\",\"7\",\"9\"]",
+    "vec": "<1,4,3,2,5,0>",
+    "z": null,
+    "complement": null,
+    "inversion": null
+  }
+];
+```
+
+#### Substring Search
+
+```ts
+// GET /api/data/vec/*3250 or // GET /api/data/vec/*325
+[
+  {
+    "number": "6-32",
+    "primeForm": "[\"0\",\"2\",\"4\",\"5\",\"7\",\"9\"]",
+    "vec": "<1,4,3,2,5,0>",
+    "z": null,
+    "complement": null,
+    "inversion": null
+  }
+];
+```
+
+#### Not Search
+
+- Works with !0, !^0, !0$, !@0, !*0,
+  - ! is equivalent to !` 
+  - `! is not a valid search method
+
+```ts
+// GET /api/data/primeForm/!000000
+[
+  {
+    "number": "2-1",
+    "primeForm": "[\"0\",\"1\"]",
+    "vec": "<1,0,0,0,0,0>",
+    "z": null,
+    "complement": "10-1",
+    "inversion": null
+  },
+    ...,
+  {
+    "number": "12-1",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\",\"T\",\"E\"]",
+    "vec": "<C,C,C,C,C,6>",
+    "z": null,
+    "complement": "0-1",
+    "inversion": null
+  }
+];
+```
+
+#### Exclude Search
+
+- Works with \`0, \`^0, \`0$, \`@0, \`*0
+
+```ts
+// GET /api/data/vec/!000000,`@0,`@1,`@2,`^8,`^6,`@5,`@4,`@7
+[
+  {
+    "number": "7-31A",
+    "primeForm": "[\"0\",\"1\",\"3\",\"4\",\"6\",\"7\",\"9\"]",
+    "vec": "<3,3,6,3,3,3>",
+    "z": null,
+    "complement": "5-31B",
+    "inversion": "[\"0\",\"2\",\"3\",\"5\",\"6\",\"8\",\"9\"]"
+  },
+  {
+    "number": "7-31B",
+    "primeForm": "[\"0\",\"2\",\"3\",\"5\",\"6\",\"8\",\"9\"]",
+    "vec": "<3,3,6,3,3,3>",
+    "z": null,
+    "complement": "5-31A",
+    "inversion": "[\"0\",\"1\",\"3\",\"4\",\"6\",\"7\",\"9\"]"
+  },
+  {
+    "number": "12-1",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\",\"T\",\"E\"]",
+    "vec": "<C,C,C,C,C,6>",
+    "z": null,
+    "complement": "0-1",
+    "inversion": null
+  }
+];
+```
+
+#### Chaining Methods (no duplicates)
+
+```ts
+// GET /api/data/vec/321000,^353,441$
+[
+  {
+    "number": "4-1",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\"]",
+    "vec": "<3,2,1,0,0,0>",
+    "z": null,
+    "complement": "8-1",
+    "inversion": null
+  },
+  {
+    "number": "7-24A",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"5\",\"7\",\"9\"]",
+    "vec": "<3,5,3,4,4,2>",
+    "z": null,
+    "complement": "5-24B",
+    "inversion": "[\"0\",\"2\",\"4\",\"6\",\"7\",\"8\",\"9\"]"
+  },
+  {
+    "number": "7-24B",
+    "primeForm": "[\"0\",\"2\",\"4\",\"6\",\"7\",\"8\",\"9\"]",
+    "vec": "<3,5,3,4,4,2>",
+    "z": null,
+    "complement": "5-24A",
+    "inversion": "[\"0\",\"1\",\"2\",\"3\",\"5\",\"7\",\"9\"]"
+  },
+  {
+    "number": "7-11A",
+    "primeForm": "[\"0\",\"1\",\"3\",\"4\",\"5\",\"6\",\"8\"]",
+    "vec": "<4,4,4,4,4,1>",
+    "z": null,
+    "complement": "5-11B",
+    "inversion": "[\"0\",\"2\",\"3\",\"4\",\"5\",\"7\",\"8\"]"
+  },
+  {
+    "number": "7-11B",
+    "primeForm": "[\"0\",\"2\",\"3\",\"4\",\"5\",\"7\",\"8\"]",
+    "vec": "<4,4,4,4,4,1>",
+    "z": null,
+    "complement": "5-11A",
+    "inversion": "[\"0\",\"1\",\"3\",\"4\",\"5\",\"6\",\"8\"]"
+  }
+];
+```
+
+### GET /api/data/vec/:querySearch/:queryInequality/
+
+The endpoint returns an array of objects based on the query on the vec property using inequalities. It checks the truthiness of the chosen inequality for every position.
+
+The endpoint only works with the exact search method as in the /api/data/vec/:querySearch endpoint, you can still use ! and \` to filter out what you do not need. Other inclusion methods (\^\$\@\*) work but do not get effected by :queryInequality.
+	- /api/data/vec/:querySearch/e is equivalent to /api/data/vec/:querySearch/
+
+- Max URI length: No more than 100 characters
+- Subquery length: 2-8 characters
+	- Ex. ^1 or !`000000
+- Subquery length for Inequality: 1-2 characters
+	- Ex. e or le
+
+#### Equal Search
+
+```ts
+// GET /api/data/vec/555553/e
+[
+  {
+    "number": "8-z15A",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"6\",\"8\",\"9\"]",
+    "vec": "<5,5,5,5,5,3>",
+    "z": "8-z29A",
+    "complement": "4-z15B",
+    "inversion": "[\"0\",\"1\",\"3\",\"5\",\"6\",\"7\",\"8\",\"9\"]"
+  },
+  {
+    "number": "8-z15B",
+    "primeForm": "[\"0\",\"1\",\"3\",\"5\",\"6\",\"7\",\"8\",\"9\"]",
+    "vec": "<5,5,5,5,5,3>",
+    "z": "8-z29A",
+    "complement": "4-z15A",
+    "inversion": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"6\",\"8\",\"9\"]"
+  },
+  {
+    "number": "8-z29A",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"5\",\"6\",\"7\",\"9\"]",
+    "vec": "<5,5,5,5,5,3>",
+    "z": "8-z15A",
+    "complement": "4-z29B",
+    "inversion": "[\"0\",\"2\",\"3\",\"4\",\"6\",\"7\",\"8\",\"9\"]"
+  },
+  {
+    "number": "8-z29B",
+    "primeForm": "[\"0\",\"2\",\"3\",\"4\",\"6\",\"7\",\"8\",\"9\"]",
+    "vec": "<5,5,5,5,5,3>",
+    "z": "8-z15A",
+    "complement": "4-z29A",
+    "inversion": "[\"0\",\"1\",\"2\",\"3\",\"5\",\"6\",\"7\",\"9\"]"
+  }
+];
+```
+
+
+#### Less Than Search
+
+```ts
+// GET /api/data/vec/555553/l
+[
+  {
+    "number": "0-1",
+    "primeForm": "[\"\"]",
+    "vec": "<0,0,0,0,0,0>",
+    "z": null,
+    "complement": "12-1",
+    "inversion": null
+  },
+    ...
+  {
+    "number": "7-z38B",
+    "primeForm": "[\"0\",\"1\",\"3\",\"4\",\"6\",\"7\",\"8\"]",
+    "vec": "<4,3,4,4,4,2>",
+    "z": "7-z18A",
+    "complement": "5-z38A",
+    "inversion": "[\"0\",\"1\",\"2\",\"4\",\"5\",\"7\",\"8\"]"
+  }
+];
+```
+
+#### Less Than Or Equal To Search
+
+```ts
+// GET /api/data/vec/555553/le
+[
+  {
+    "number": "0-1",
+    "primeForm": "[\"\"]",
+    "vec": "<0,0,0,0,0,0>",
+    "z": null,
+    "complement": "12-1",
+    "inversion": null
+  },
+    ...
+  {
+    "number": "8-z29B",
+    "primeForm": "[\"0\",\"2\",\"3\",\"4\",\"6\",\"7\",\"8\",\"9\"]",
+    "vec": "<5,5,5,5,5,3>",
+    "z": "8-z15A",
+    "complement": "4-z29A",
+    "inversion": "[\"0\",\"1\",\"2\",\"3\",\"5\",\"6\",\"7\",\"9\"]"
+  }
+];
+```
+
+#### Greater Than Search
+
+```ts
+// GET /api/data/vec/555553/g
+[
+  {
+    "number": "9-5A",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"6\",\"7\",\"8\",\"9\"]",
+    "vec": "<7,6,6,6,7,4>",
+    "z": null,
+    "complement": "3-5B",
+    "inversion": "[\"0\",\"1\",\"2\",\"3\",\"5\",\"6\",\"7\",\"8\",\"9\"]"
+  },
+    ...
+  {
+    "number": "12-1",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\",\"T\",\"E\"]",
+    "vec": "<C,C,C,C,C,6>",
+    "z": null,
+    "complement": "0-1",
+    "inversion": null
+  }
+];
+```
+
+#### Greater Than Or Equal To Search
+
+```ts
+// GET /api/data/vec/555553/ge
+[
+  {
+    "number": "8-z15A",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"6\",\"8\",\"9\"]",
+    "vec": "<5,5,5,5,5,3>",
+    "z": "8-z29A",
+    "complement": "4-z15B",
+    "inversion": "[\"0\",\"1\",\"3\",\"5\",\"6\",\"7\",\"8\",\"9\"]"
+  },
+    ...
+  {
+    "number": "12-1",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\",\"T\",\"E\"]",
+    "vec": "<C,C,C,C,C,6>",
+    "z": null,
+    "complement": "0-1",
+    "inversion": null
+  }
+];
+```
+
+### GET /api/data/z/:querySearch/
 
 The endpoint returns an array of objects based on the query on the z property
 
-- Max URI length: No more than 8 characters
+- Max URI length: No more than 100 characters
+- Subquery length: 2-8 characters
+	- Ex. ^0 or !`6-z25A
 
 #### Exact Search
 
@@ -509,18 +1294,20 @@ The endpoint returns an array of objects based on the query on the z property
 [
   {
     "number": "0-1",
-    "primeForm": '[""]',
+    "primeForm": "[\"\"]",
     "vec": "<0,0,0,0,0,0>",
     "z": null
-    "complement": "12-1"
+    "complement": "12-1",
+    "inversion": null
   },
    ...
   {
     "number": "12-1",
-    "primeForm": '["0","1","2","3","4","5","6","7","8","9","T","E"]',
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\",\"T\",\"E\"]",
     "vec": "<C,C,C,C,C,6>",
     "z": null,
-    "complement": "0-1"
+    "complement": "0-1",
+    "inversion": null
   }
 ];
 
@@ -528,10 +1315,11 @@ The endpoint returns an array of objects based on the query on the z property
 [
   {
     "number": "5-z17",
-    "primeForm": '["0","1","3","4","8"]',
+    "primeForm": "[\"0\",\"3\",\"4\",\"5\",\"8\"]",
     "vec": "<2,1,2,3,2,0>",
     "z": "5-z37",
-    "complement": "7-z17"
+    "complement": "7-z17",
+    "inversion": null
   }
 ];
 ```
@@ -539,122 +1327,797 @@ The endpoint returns an array of objects based on the query on the z property
 #### Starts With Search
 
 ```ts
-// GET /api/data/z/^4-z15
+// GET /api/data/z/^5-z3
 [
-	{
-		number: "4-z29A",
-		primeForm: '["0","1","3","7"]',
-		vec: "<1,1,1,1,1,1>",
-		z: "4-z15A",
-		complement: "8-z29B"
-	},
-	{
-		number: "4-z29B",
-		primeForm: '["0","4","6","7"]',
-		vec: "<1,1,1,1,1,1>",
-		z: "4-z15A",
-		complement: "8-z29A"
-	}
+  {
+    "number": "5-z12",
+    "primeForm": "[\"0\",\"1\",\"3\",\"5\",\"6\"]",
+    "vec": "<2,2,2,1,2,1>",
+    "z": "5-z36A",
+    "complement": "7-z12",
+    "inversion": null
+  },
+  {
+    "number": "5-z17",
+    "primeForm": "[\"0\",\"1\",\"3\",\"4\",\"8\"]",
+    "vec": "<2,1,2,3,2,0>",
+    "z": "5-z37",
+    "complement": "7-z17",
+    "inversion": null
+  },
+  {
+    "number": "5-z18A",
+    "primeForm": "[\"0\",\"1\",\"4\",\"5\",\"7\"]",
+    "vec": "<2,1,2,2,2,1>",
+    "z": "5-z38A",
+    "complement": "7-z18A",
+    "inversion": "[\"0\",\"2\",\"3\",\"6\",\"7\"]"
+  },
+  {
+    "number": "5-z18B",
+    "primeForm": "[\"0\",\"2\",\"3\",\"6\",\"7\"]",
+    "vec": "<2,1,2,2,2,1>",
+    "z": "5-z38A",
+    "complement": "7-z18B",
+    "inversion": "[\"0\",\"1\",\"4\",\"5\",\"7\"]"
+  }
 ];
 ```
 
 #### Ends With Search
 
 ```ts
-// GET /api/data/z/-z50$
+// GET /api/data/z/23$
 [
-	{
-		number: "6-z29",
-		primeForm: '["0","2","3","6","7","9"]',
-		vec: "<2,2,4,2,3,2>",
-		z: "6-z50",
-		complement: "6-z50"
-	}
+  {
+    "number": "6-z45",
+    "primeForm": "[\"0\",\"2\",\"3\",\"4\",\"6\",\"9\"]",
+    "vec": "<2,3,4,2,2,2>",
+    "z": "6-z23",
+    "complement": "6-z23",
+    "inversion": null
+  }
 ];
 ```
 
-### GET /api/data/complement/:query
+#### Contains Search
+
+```ts
+// GET /api/data/z/@45
+[
+  {
+    "number": "4-z29A",
+    "primeForm": "[\"0\",\"1\",\"3\",\"7\"]",
+    "vec": "<1,1,1,1,1,1>",
+    "z": "4-z15A",
+    "complement": "8-z29B",
+    "inversion": "[\"0\",\"4\",\"6\",\"7\"]"
+  },
+  {
+    "number": "4-z29B",
+    "primeForm": "[\"0\",\"4\",\"6\",\"7\"]",
+    "vec": "<1,1,1,1,1,1>",
+    "z": "4-z15A",
+    "complement": "8-z29A",
+    "inversion": "[\"0\",\"1\",\"3\",\"7\"]"
+  },
+  {
+    "number": "6-z23",
+    "primeForm": "[\"0\",\"2\",\"3\",\"5\",\"6\",\"8\"]",
+    "vec": "<2,3,4,2,2,2>",
+    "z": "6-z45",
+    "complement": "6-z45",
+    "inversion": null
+  }
+];
+```
+
+#### Substring Search
+
+```ts
+// GET /api/data/z/*45
+[
+  {
+    "number": "6-z23",
+    "primeForm": "[\"0\",\"2\",\"3\",\"5\",\"6\",\"8\"]",
+    "vec": "<2,3,4,2,2,2>",
+    "z": "6-z45",
+    "complement": "6-z45",
+    "inversion": null
+  }
+];
+```
+
+#### Not Search
+
+- Works with !1-1, !^1-1, !1-1$, !@A, !*A,
+  - ! is equivalent to !` 
+  - `! is not a valid search method
+- Use %20 for whitespace equivalent to the empty array for 0-1  
+
+```ts
+// GET /api/data/z/!null
+[
+  {
+    "number": "4-z15A",
+    "primeForm": "[\"0\",\"1\",\"4\",\"6\"]",
+    "vec": "<1,1,1,1,1,1>",
+    "z": "4-z29A",
+    "complement": "8-z15B",
+    "inversion": "[\"0\",\"2\",\"5\",\"6\"]"
+  },
+    ...,
+  {
+    "number": "8-z29B",
+    "primeForm": "[\"0\",\"2\",\"3\",\"4\",\"6\",\"7\",\"8\",\"9\"]",
+    "vec": "<5,5,5,5,5,3>",
+    "z": "8-z15A",
+    "complement": "4-z29A",
+    "inversion": "[\"0\",\"1\",\"2\",\"3\",\"5\",\"6\",\"7\",\"9\"]"
+  }
+];
+```
+
+#### Exclude Search
+
+- Works with \`1-1, \`^1-1, \`1-1$, \`@A, \`*A
+
+```ts
+// GET /api/data/z/7-z12,8-z29A,`7-z12
+[
+  {
+    "number": "8-z15A",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"6\",\"8\",\"9\"]",
+    "vec": "<5,5,5,5,5,3>",
+    "z": "8-z29A",
+    "complement": "4-z15B",
+    "inversion": "[\"0\",\"1\",\"3\",\"5\",\"6\",\"7\",\"8\",\"9\"]"
+  },
+  {
+    "number": "8-z15B",
+    "primeForm": "[\"0\",\"1\",\"3\",\"5\",\"6\",\"7\",\"8\",\"9\"]",
+    "vec": "<5,5,5,5,5,3>",
+    "z": "8-z29A",
+    "complement": "4-z15A",
+    "inversion": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"6\",\"8\",\"9\"]"
+  }
+];
+```
+
+#### Chaining Methods (no duplicates)
+
+```ts
+// GET /api/data/z/8-z29A,^7-z1,-z29A,`7-z18A
+[
+  {
+    "number": "8-z15A",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"6\",\"8\",\"9\"]",
+    "vec": "<5,5,5,5,5,3>",
+    "z": "8-z29A",
+    "complement": "4-z15B",
+    "inversion": "[\"0\",\"1\",\"3\",\"5\",\"6\",\"7\",\"8\",\"9\"]"
+  },
+  {
+    "number": "8-z15B",
+    "primeForm": "[\"0\",\"1\",\"3\",\"5\",\"6\",\"7\",\"8\",\"9\"]",
+    "vec": "<5,5,5,5,5,3>",
+    "z": "8-z29A",
+    "complement": "4-z15A",
+    "inversion": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"6\",\"8\",\"9\"]"
+  },
+  {
+    "number": "7-z36A",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"5\",\"6\",\"8\"]",
+    "vec": "<4,4,4,3,4,2>",
+    "z": "7-z12",
+    "complement": "5-z36B",
+    "inversion": "[\"0\",\"2\",\"3\",\"5\",\"6\",\"7\",\"8\"]"
+  },
+  {
+    "number": "7-z36B",
+    "primeForm": "[\"0\",\"2\",\"3\",\"5\",\"6\",\"7\",\"8\"]",
+    "vec": "<4,4,4,3,4,2>",
+    "z": "7-z12",
+    "complement": "5-z36A",
+    "inversion": "[\"0\",\"1\",\"2\",\"3\",\"5\",\"6\",\"8\"]"
+  },
+  {
+    "number": "7-z37",
+    "primeForm": "[\"0\",\"1\",\"3\",\"4\",\"5\",\"7\",\"8\"]",
+    "vec": "<4,3,4,5,4,1>",
+    "z": "7-z17",
+    "complement": "5-z37",
+    "inversion": null
+  }
+];
+```
+
+### GET /api/data/complement/:querySearch/
 
 The endpoint returns an array of objects based on the query on the complement property
 
-- Max URI length: No more than 8 characters
+- Max URI length: No more than 100 characters
+- Subquery length: 2-8 characters
+	- Ex. ^0 or !`6-z25A
 
 #### Exact Search
 
 ```ts
 // GET /api/data/complement/null
 [
-	{
-		number: "6-1",
-		primeForm: '["0","1","2","3","4","5"]',
-		vec: "<5,4,3,2,1,0>",
-		z: null,
-		complement: null
-	},
-	  ...
-	{
-		number: "6-35",
-		primeForm: '["0","2","4","6","8","T"]',
-		vec: "<0,6,0,6,0,3>",
-		z: null,
-		complement: null
-	}
+  {
+    "number": "6-1",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"5\"]",
+    "vec": "<5,4,3,2,1,0>",
+    "z": null,
+    "complement": null,
+    "inversion": null
+  },
+   ...
+  {
+    "number": "6-35",
+    "primeForm": "[\"0\",\"2\",\"4\",\"6\",\"8\",\"T\"]",
+    "vec": "<0,6,0,6,0,3>",
+    "z": null,
+    "complement": null,
+    "inversion": null
+  }
 ];
 
 // GET /api/data/complement/5-z37
 [
-	{
-		number: "7-z37",
-		primeForm: '["0","1","3","4","5","7","8"]',
-		vec: "<4,3,4,5,4,1>",
-		z: "7-z17",
-		complement: "5-z37"
-	}
+  {
+    "number": "7-z37",
+    "primeForm": "[\"0\",\"1\",\"3\",\"4\",\"5\",\"7\",\"8\"]",
+    "vec": "<4,3,4,5,4,1>",
+    "z": "7-z17",
+    "complement": "5-z37",
+    "inversion": null
+  }
 ];
 ```
 
 #### Starts With Search
 
 ```ts
-// GET /api/data/complement/^4-z15
+// GET /api/data/complement/^5-z36
 [
-	{
-		number: "8-z15A",
-		primeForm: '["0","1","2","3","4","6","8","9"]',
-		vec: "<5,5,5,5,5,3>",
-		z: "8-z29A",
-		complement: "4-z15B"
-	},
-	{
-		number: "8-z15B",
-		primeForm: '["0","1","3","5","6","7","8","9"]',
-		vec: "<5,5,5,5,5,3>",
-		z: "8-z29A",
-		complement: "4-z15A"
-	}
+  {
+    "number": "7-z36A",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"5\",\"6\",\"8\"]",
+    "vec": "<4,4,4,3,4,2>",
+    "z": "7-z12",
+    "complement": "5-z36B",
+    "inversion": "[\"0\",\"2\",\"3\",\"5\",\"6\",\"7\",\"8\"]"
+  },
+  {
+    "number": "7-z36B",
+    "primeForm": "[\"0\",\"2\",\"3\",\"5\",\"6\",\"7\",\"8\"]",
+    "vec": "<4,4,4,3,4,2>",
+    "z": "7-z12",
+    "complement": "5-z36A",
+    "inversion": "[\"0\",\"1\",\"2\",\"3\",\"5\",\"6\",\"8\"]"
+  }
 ];
 ```
 
 #### Ends With Search
 
 ```ts
-// GET /api/data/complement/-z50$
+// GET /api/data/complement/23$
 [
-	{
-		number: "6-z29",
-		primeForm: '["0","2","3","6","7","9"]',
-		vec: "<2,2,4,2,3,2>",
-		z: "6-z50",
-		complement: "6-z50"
-	}
+  {
+    "number": "4-23",
+    "primeForm": "[\"0\",\"2\",\"5\",\"7\"]",
+    "vec": "<0,2,1,0,3,0>",
+    "z": null,
+    "complement": "8-23",
+    "inversion": null
+  },
+  {
+    "number": "6-z45",
+    "primeForm": "[\"0\",\"2\",\"3\",\"4\",\"6\",\"9\"]",
+    "vec": "<2,3,4,2,2,2>",
+    "z": "6-z23",
+    "complement": "6-z23",
+    "inversion": null
+  },
+  {
+    "number": "8-23",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"5\",\"7\",\"8\",\"T\"]",
+    "vec": "<4,6,5,4,7,2>",
+    "z": null,
+    "complement": "4-23",
+    "inversion": null
+  }
 ];
 ```
 
-### GET /api/data/d3/:query
+#### Contains Search
+
+```ts
+// GET /api/data/complement/@36A
+[
+  {
+    "number": "5-z36B",
+    "primeForm": "[\"0\",\"3\",\"5\",\"6\",\"7\"]",
+    "vec": "<2,2,2,1,2,1>",
+    "z": "5-z12",
+    "complement": "7-z36A",
+    "inversion": "[\"0\",\"1\",\"2\",\"4\",\"7\"]"
+  },
+  {
+    "number": "6-z3B",
+    "primeForm": "[\"0\",\"1\",\"3\",\"4\",\"5\",\"6\"]",
+    "vec": "<4,3,3,2,2,1>",
+    "z": "6-z36A",
+    "complement": "6-z36A",
+    "inversion": "[\"0\",\"1\",\"2\",\"3\",\"5\",\"6\"]"
+  },
+  {
+    "number": "6-z10B",
+    "primeForm": "[\"0\",\"2\",\"3\",\"4\",\"6\",\"7\"]",
+    "vec": "<3,3,3,3,2,1>",
+    "z": "6-z39A",
+    "complement": "6-z39A",
+    "inversion": "[\"0\",\"1\",\"3\",\"4\",\"5\",\"7\"]"
+  },
+  {
+    "number": "6-z17B",
+    "primeForm": "[\"0\",\"1\",\"4\",\"6\",\"7\",\"8\"]",
+    "vec": "<3,2,2,3,3,2>",
+    "z": "6-z43A",
+    "complement": "6-z43A",
+    "inversion": "[\"0\",\"1\",\"2\",\"4\",\"7\",\"8\"]"
+  },
+  {
+    "number": "6-z36B",
+    "primeForm": "[\"0\",\"3\",\"4\",\"5\",\"6\",\"7\"]",
+    "vec": "<4,3,3,2,2,1>",
+    "z": "6-z3A",
+    "complement": "6-z3A",
+    "inversion": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"7\"]"
+  },
+  {
+    "number": "7-z36B",
+    "primeForm": "[\"0\",\"2\",\"3\",\"5\",\"6\",\"7\",\"8\"]",
+    "vec": "<4,4,4,3,4,2>",
+    "z": "7-z12",
+    "complement": "5-z36A",
+    "inversion": "[\"0\",\"1\",\"2\",\"3\",\"5\",\"6\",\"8\"]"
+  }
+];
+```
+
+#### Substring Search
+
+```ts
+// GET /api/data/complement/*36A
+[
+  {
+    "number": "5-z36B",
+    "primeForm": "[\"0\",\"3\",\"5\",\"6\",\"7\"]",
+    "vec": "<2,2,2,1,2,1>",
+    "z": "5-z12",
+    "complement": "7-z36A",
+    "inversion": "[\"0\",\"1\",\"2\",\"4\",\"7\"]"
+  },
+  {
+    "number": "6-z3B",
+    "primeForm": "[\"0\",\"1\",\"3\",\"4\",\"5\",\"6\"]",
+    "vec": "<4,3,3,2,2,1>",
+    "z": "6-z36A",
+    "complement": "6-z36A",
+    "inversion": "[\"0\",\"1\",\"2\",\"3\",\"5\",\"6\"]"
+  },
+  {
+    "number": "7-z36B",
+    "primeForm": "[\"0\",\"2\",\"3\",\"5\",\"6\",\"7\",\"8\"]",
+    "vec": "<4,4,4,3,4,2>",
+    "z": "7-z12",
+    "complement": "5-z36A",
+    "inversion": "[\"0\",\"1\",\"2\",\"3\",\"5\",\"6\",\"8\"]"
+  }
+];
+```
+
+#### Not Search
+
+- Works with !1-1, !^1-1, !1-1$, !@A, !*A,
+  - ! is equivalent to !` 
+  - `! is not a valid search method
+- Use %20 for whitespace equivalent to the empty array for 0-1  
+
+```ts
+// GET /api/data/complement/!null
+[
+  {
+    "number": "0-1",
+    "primeForm": "[\"\"]",
+    "vec": "<0,0,0,0,0,0>",
+    "z": null,
+    "complement": "12-1",
+    "inversion": null
+  },
+    ...,
+  {
+    "number": "12-1",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\",\"T\",\"E\"]",
+    "vec": "<C,C,C,C,C,6>",
+    "z": null,
+    "complement": "0-1",
+    "inversion": null
+  }
+];
+```
+
+#### Exclude Search
+
+- Works with !1-1, !^1-1, !1-1$, !@A, !*A,
+
+```ts
+// GET /api/data/complement/1-1,11-1,`1-1
+[
+  {
+    "number": "1-1",
+    "primeForm": "[\"0\"]",
+    "vec": "<0,0,0,0,0,0>",
+    "z": null,
+    "complement": "11-1",
+    "inversion": null
+  }
+];
+```
+
+#### Chaining Methods (no duplicates)
+
+```ts
+// GET /api/data/complement/8-z29A,^7-z1,-z29A,`7-z18A,`B$
+[
+  {
+    "number": "4-z29B",
+    "primeForm": "[\"0\",\"4\",\"6\",\"7\"]",
+    "vec": "<1,1,1,1,1,1>",
+    "z": "4-z15A",
+    "complement": "8-z29A",
+    "inversion": "[\"0\",\"1\",\"3\",\"7\"]"
+  },
+  {
+    "number": "5-z12",
+    "primeForm": "[\"0\",\"1\",\"3\",\"5\",\"6\"]",
+    "vec": "<2,2,2,1,2,1>",
+    "z": "5-z36A",
+    "complement": "7-z12",
+    "inversion": null
+  },
+  {
+    "number": "5-z17",
+    "primeForm": "[\"0\",\"1\",\"3\",\"4\",\"8\"]",
+    "vec": "<2,1,2,3,2,0>",
+    "z": "5-z37",
+    "complement": "7-z17",
+    "inversion": null
+  }
+];
+```
+### GET /api/data/inversion/:querySearch/
+
+The endpoint returns an array of objects based on the query on the inversion property
+
+Use T for 10, E for 11, and C for 12.
+
+- Max URI length: No more than 100 characters
+- Subquery length: 2-14 characters
+	- Ex. ^0 or !`0123456789TE
+
+#### Exact Search
+
+```ts
+// GET /api/data/inversion/null
+[
+  {
+    "number": "0-1",
+    "primeForm": "[\"\"]",
+    "vec": "<0,0,0,0,0,0>",
+    "z": null
+    "complement": "12-1",
+    "inversion": null
+  },
+   ...
+  {
+    "number": "12-1",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\",\"T\",\"E\"]",
+    "vec": "<C,C,C,C,C,6>",
+    "z": null,
+    "complement": "0-1",
+    "inversion": null
+  }
+];
+
+// GET /api/data/inversion/026
+[
+  {
+    "number": "3-8B",
+    "primeForm": "[\"0\",\"4\",\"6\"]",
+    "vec": "<0,1,0,1,0,1>",
+    "z": null,
+    "complement": "9-8A",
+    "inversion": "[\"0\",\"2\",\"6\"]"
+  }
+];
+```
+
+#### Starts With Search
+
+```ts
+// GET /api/data/inversion/^02367
+[
+  {
+    "number": "5-z18A",
+    "primeForm": "[\"0\",\"1\",\"4\",\"5\",\"7\"]",
+    "vec": "<2,1,2,2,2,1>",
+    "z": "5-z38A",
+    "complement": "7-z18A",
+    "inversion": "[\"0\",\"2\",\"3\",\"6\",\"7\"]"
+  },
+  {
+    "number": "6-z43A",
+    "primeForm": "[\"0\",\"1\",\"2\",\"5\",\"6\",\"8\"]",
+    "vec": "<3,2,2,3,3,2>",
+    "z": "6-z17A",
+    "complement": "6-z17B",
+    "inversion": "[\"0\",\"2\",\"3\",\"6\",\"7\",\"8\"]"
+  }
+];
+```
+
+#### Ends With Search
+
+```ts
+// GET /api/data/inversion/23$
+[
+  {
+    "number": "3-2A",
+    "primeForm": "[\"0\",\"1\",\"3\"]",
+    "vec": "<1,1,1,0,0,0>",
+    "z": null,
+    "complement": "9-2A",
+    "inversion": "[\"0\",\"2\",\"3\"]"
+  }
+];
+```
+
+#### Contains Search
+
+```ts
+// GET /api/data/inversion/@45789
+[
+  {
+    "number": "7-27A",
+    "primeForm": "[\"0\",\"1\",\"2\",\"4\",\"5\",\"7\",\"9\"]",
+    "vec": "<3,4,4,4,5,1>",
+    "z": null,
+    "complement": "5-27B",
+    "inversion": "[\"0\",\"2\",\"4\",\"5\",\"7\",\"8\",\"9\"]"
+  },
+  {
+    "number": "8-11A",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"5\",\"7\",\"9\"]",
+    "vec": "<5,6,5,5,5,2>",
+    "z": null,
+    "complement": "4-11B",
+    "inversion": "[\"0\",\"2\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\"]"
+  },
+  {
+    "number": "8-14A",
+    "primeForm": "[\"0\",\"1\",\"2\",\"4\",\"5\",\"6\",\"7\",\"9\"]",
+    "vec": "<5,5,5,5,6,2>",
+    "z": null,
+    "complement": "4-14A",
+    "inversion": "[\"0\",\"2\",\"3\",\"4\",\"5\",\"7\",\"8\",\"9\"]"
+  },
+  {
+    "number": "8-19A",
+    "primeForm": "[\"0\",\"1\",\"2\",\"4\",\"5\",\"6\",\"8\",\"9\"]",
+    "vec": "<5,4,5,7,5,2>",
+    "z": null,
+    "complement": "4-19B",
+    "inversion": "[\"0\",\"1\",\"3\",\"4\",\"5\",\"7\",\"8\",\"9\"]"
+  },
+  {
+    "number": "9-2A",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"9\"]",
+    "vec": "<7,7,7,6,6,3>",
+    "z": null,
+    "complement": "3-2A",
+    "inversion": "[\"0\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\"]"
+  },
+  {
+    "number": "9-3A",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"8\",\"9\"]",
+    "vec": "<7,6,7,7,6,3>",
+    "z": null,
+    "complement": "3-3B",
+    "inversion": "[\"0\",\"1\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\"]"
+  },
+  {
+    "number": "9-4A",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"5\",\"7\",\"8\",\"9\"]",
+    "vec": "<7,6,6,7,7,3>",
+    "z": null,
+    "complement": "3-4B",
+    "inversion": "[\"0\",\"1\",\"2\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\"]"
+  },
+  {
+    "number": "9-4B",
+    "primeForm": "[\"0\",\"1\",\"2\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\"]",
+    "vec": "<7,6,6,7,7,3>",
+    "z": null,
+    "complement": "3-4A",
+    "inversion": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"5\",\"7\",\"8\",\"9\"]"
+  }
+];
+```
+
+#### Substring Search
+
+```ts
+// GET /api/data/inversion/*45789
+[
+  {
+    "number": "7-27A",
+    "primeForm": "[\"0\",\"1\",\"2\",\"4\",\"5\",\"7\",\"9\"]",
+    "vec": "<3,4,4,4,5,1>",
+    "z": null,
+    "complement": "5-27B",
+    "inversion": "[\"0\",\"2\",\"4\",\"5\",\"7\",\"8\",\"9\"]"
+  },
+  {
+    "number": "8-14A",
+    "primeForm": "[\"0\",\"1\",\"2\",\"4\",\"5\",\"6\",\"7\",\"9\"]",
+    "vec": "<5,5,5,5,6,2>",
+    "z": null,
+    "complement": "4-14A",
+    "inversion": "[\"0\",\"2\",\"3\",\"4\",\"5\",\"7\",\"8\",\"9\"]"
+  },
+  {
+    "number": "8-19A",
+    "primeForm": "[\"0\",\"1\",\"2\",\"4\",\"5\",\"6\",\"8\",\"9\"]",
+    "vec": "<5,4,5,7,5,2>",
+    "z": null,
+    "complement": "4-19B",
+    "inversion": "[\"0\",\"1\",\"3\",\"4\",\"5\",\"7\",\"8\",\"9\"]"
+  },
+  {
+    "number": "9-4B",
+    "primeForm": "[\"0\",\"1\",\"2\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\"]",
+    "vec": "<7,6,6,7,7,3>",
+    "z": null,
+    "complement": "3-4A",
+    "inversion": "[\"0\",\"1\",\"2\",\"3\",\"4\",\"5\",\"7\",\"8\",\"9\"]"
+  }
+];
+```
+
+#### Not Search
+
+- Works with !0, !^0, !0$, !@0, !*0,
+  - ! is equivalent to !` 
+  - `! is not a valid search method
+- Use %20 for whitespace equivalent to the empty array for 0-1  
+
+```ts
+// GET /api/data/inversion/!null
+[
+  {
+    "number": "3-2A",
+    "primeForm": "[\"0\",\"1\",\"3\"]",
+    "vec": "<1,1,1,0,0,0>",
+    "z": null,
+    "complement": "9-2A",
+    "inversion": "[\"0\",\"2\",\"3\"]"
+  },
+    ...,
+  {
+    "number": "9-11B",
+    "primeForm": "[\"0\",\"1\",\"2\",\"4\",\"5\",\"6\",\"7\",\"9\",\"T\"]",
+    "vec": "<6,6,7,7,7,3>",
+    "z": null,
+    "complement": "3-11A",
+    "inversion": "[\"0\",\"1\",\"2\",\"3\",\"5\",\"6\",\"7\",\"9\",\"T\"]"
+  }
+];
+```
+
+#### Exclude Search
+
+- Works with \`0, \`^0, \`0$, \`@0, \`*0
+
+```ts
+// GET /api/data/inversion/0124,01245,`0124
+[
+  {
+    "number": "5-3B",
+    "primeForm": "[\"0\",\"1\",\"3\",\"4\",\"5\"]",
+    "vec": "<3,2,2,2,1,0>",
+    "z": null,
+    "complement": "7-3A",
+    "inversion": "[\"0\",\"1\",\"2\",\"4\",\"5\"]"
+  }
+];
+```
+
+#### Chaining Methods (no duplicates)
+
+```ts
+// GET /api/data/inversion/0124,^012567,01245$,`@9
+[
+  {
+    "number": "4-2B",
+    "primeForm": "[\"0\",\"2\",\"3\",\"4\"]",
+    "vec": "<2,2,1,1,0,0>",
+    "z": null,
+    "complement": "8-2A",
+    "inversion": "[\"0\",\"1\",\"2\",\"4\"]"
+  },
+  {
+    "number": "7-7A",
+    "primeForm": "[\"0\",\"1\",\"2\",\"3\",\"6\",\"7\",\"8\"]",
+    "vec": "<5,3,2,3,5,3>",
+    "z": null,
+    "complement": "5-7B",
+    "inversion": "[\"0\",\"1\",\"2\",\"5\",\"6\",\"7\",\"8\"]"
+  },
+  {
+    "number": "5-3B",
+    "primeForm": "[\"0\",\"1\",\"3\",\"4\",\"5\"]",
+    "vec": "<3,2,2,2,1,0>",
+    "z": null,
+    "complement": "7-3A",
+    "inversion": "[\"0\",\"1\",\"2\",\"4\",\"5\"]"
+  }
+];
+```
+
+### GET /api/data/:queryProp/PROPERTY/:querySearch/
+
+Using the GET /api/data/:queryProp endpoint you can filter out the properties you want from the resulting querySearch
+
+Lengths For :queryProp\:
+- Max URI length: No more than 43 characters
+- Subquery length: 1-10 characters
+
+##### Endpoints:
+- /api/data/:queryProp/number/:querySearch/
+- /api/data/:queryProp/primeForm/:querySearch/
+- /api/data/:queryProp/vec/:querySearch/
+- /api/data/:queryProp/vec/:querySearch/:queryInequality/
+- /api/data/:queryProp/z/:querySearch/
+- /api/data/:queryProp/complement/:querySearch/
+- /api/data/:queryProp/inversion/:querySearch/
+
+```ts
+// GET /api/data/primeForm/number/1-1
+[
+  {
+    "primeForm": "[\"0\"]"
+  }
+];
+
+// GET /api/data/number,primeForm/number/1-1
+[
+  {
+    "number": "1-1",
+    "primeForm": "[\"0\"]"
+  }
+];
+```
+
+### GET /api/data/d3/:querySearch/
 
 The endpoint returns either json for a valid d3dag graph or json for valid dag links
 
-A option for forte numbers, encoded like this "[\"0\"]|1-1", is added to allow the ability to toggle between primeForm and number on a d3dag by splitting on "|"
+A option for forte numbers, encoded like this "[\"0\"]|1-1|000000", is added to allow the ability to toggle between primeForm, number, and vec on a d3dag by splitting on "|"
 
 - Max URI length: No more than 22 characters
 
@@ -692,63 +2155,146 @@ While comparing [\"0\",\"1\",\"3\",\"4\"] > [\"0\",\"2\",\"3\"], it returns fals
     "target": "[\"0\",\"2\",\"3\",\"4\"]"
   }
 ```
+
+#### Vector-Similarity
+
+The operations here are done on the vec property.
+
+Vectors are compared using cosine similarity and are linked to the set with the highest cosine similarity.
+
+#### Original vs Inversion
+
+Original means no inversions (no B sets), but sets are still labelled 3-11A instead of 3-11.
+
+Inversion means with inversions so it includes both A and B sets.
+
 #### Manual Construction
 
 The json files here can be recreated using the set_classes.json file.
 
 ##### Links
 ```ts
-// prime
-const flatRes = await fetch('.../api/flatdata/primeForm/')
-const data: string[] = await flatRes.json()
-linkBuilder(data, true) // change 2nd arg to false for cardinal
-
-const linkBuilder = (data: string[], condition: strict = true) => {
-  const newData: string[][] = data.map((s) => s.slice(1, -1).split(','))
-  let links: Link[] = [{ source: '[""]', target: '["0"]' }]
-
-  for (const s of newData) {
-    for (const t of newData) {
-      if (
-        s.every((e) => t.includes(e)) &&
-        s.length === t.length - 1 &&
-        (strict ? t > s : true)
-      ) {
-        links.push({ source: '[' + s.toString() + ']', target: '[' + t.toString() + ']' })
-      }
-    }
-  }
-  return links
-}
-
-// primeforte
-const res = await fetch('.../api/data/number,primeForm/')
-const data: { number: string; primeForm: string }[] = await res.json()
-linkBuilder(data, true) // change 2nd arg to false for cardinal
-
-const linkBuilder = (data: { number: string; primeForm: string }[], strict: boolean = true) => {
-  const newData: { number: string; primeForm: string[] }[] = data.map((s) => ({
+// Cardinality-Increasing
+const linkBuilder = (
+  data: { number: string; primeForm: string; vec: string }[]
+) => {
+  const newData: { number: string; primeForm: string[]; vec: string }[] = data.map((s) => ({
     primeForm: s.primeForm.slice(1, -1).split(','),
-    number: s.number
+    number: s.number,
+    vec: s.vec
   }))
-  let links: Link[] = [{ source: '[""]|0-1', target: '["0"]|1-1' }]
+  let links: Link[] = [{ source: '[""]|0-1|000000', target: '["0"]|1-1|000000' }]
 
   for (const s of newData) {
     for (const t of newData) {
       if (
         s.primeForm.every((e) => t.primeForm.includes(e)) &&
-        s.primeForm.length === t.primeForm.length - 1 &&
-        (strict ? t.primeForm > s.primeForm : true)
+        s.primeForm.length === t.primeForm.length - 1
       ) {
         links.push({
-          source: '[' + s.primeForm.toString() + ']' + '|' + s.number,
-          target: '[' + t.primeForm.toString() + ']' + '|' + t.number
+          source:
+            '[' + s.primeForm.toString() + ']' + '|' + s.number + '|' + s.vec.replace(/\D/g, ''),
+          target:
+            '[' + t.primeForm.toString() + ']' + '|' + t.number + '|' + t.vec.replace(/\D/g, '')
         })
       }
     }
   }
   return links
 }
+
+// Strictly-Increasing
+const linkBuilder = (
+  data: { number: string; primeForm: string; vec: string }[]
+) => {
+  const newData: { number: string; primeForm: string[]; vec: string }[] = data.map((s) => ({
+    primeForm: s.primeForm.slice(1, -1).split(','),
+    number: s.number,
+    vec: s.vec
+  }))
+  let links: Link[] = [{ source: '[""]|0-1|000000', target: '["0"]|1-1|000000' }]
+
+  for (const s of newData) {
+    for (const t of newData) {
+      if (
+        s.primeForm.every((e) => t.primeForm.includes(e)) &&
+        s.primeForm.length === t.primeForm.length - 1 &&
+        t.primeForm > s.primeForm
+      ) {
+        links.push({
+          source:
+            '[' + s.primeForm.toString() + ']' + '|' + s.number + '|' + s.vec.replace(/\D/g, ''),
+          target:
+            '[' + t.primeForm.toString() + ']' + '|' + t.number + '|' + t.vec.replace(/\D/g, '')
+        })
+      }
+    }
+  }
+  return links
+}
+
+// Vector-Similarity
+const linkBuilder = (
+  data: { number: string; primeForm: string; vec: string }[]
+) => {
+  const newData: { number: string; primeForm: string[]; vec: string }[] = data.map((s) => ({
+    primeForm: s.primeForm.slice(1, -1).split(','),
+    number: s.number,
+    vec: s.vec
+  }))
+  let links: Link[] = [{ source: '[""]|0-1|000000', target: '["0"]|1-1|000000' }]
+
+  for (const s of newData) {
+    let max = 0
+    let newS = null
+    let newT = null
+    for (const t of newData) {
+      const sVec = s.vec.replace(/[<>]/g, '').replace(/C/g, '12').replace(/T/g, '10').split(',')
+      const tVec = t.vec.replace(/[<>]/g, '').replace(/C/g, '12').replace(/T/g, '10').split(',')
+
+      const dotProd = tVec
+        .map((a, i) => parseInt(a) * parseInt(sVec[i]))
+        .reduce((acc, curr) => acc + curr, 0)
+      const cosSim =
+        dotProd /
+        (Math.sqrt(sVec.reduce((sum, val) => sum + parseInt(val) * parseInt(val), 0)) *
+          Math.sqrt(tVec.reduce((sum, val) => sum + parseInt(val) * parseInt(val), 0)))
+
+      if (
+        s.vec !== t.vec &&
+        t.number > s.number &&
+        cosSim > max
+      ) {
+        max = cosSim
+        newS = s
+        newT = t
+      }
+    }
+    if (newS && newT) {
+      links.push({
+        source:
+          '[' +
+          newS.primeForm.toString() +
+          ']' +
+          '|' +
+          newS.number +
+          '|' +
+          newS.vec.replace(/(?![TEC])\D/g, ''),
+        target:
+          '[' +
+          newT.primeForm.toString() +
+          ']' +
+          '|' +
+          newT.number +
+          '|' +
+          newT.vec.replace(/(?![TEC])\D/g, '')
+      })
+    }
+  }
+
+// For original dags add this to the condition
+!s.number.endsWith('B') &&
+!t.number.endsWith('B')
 ```
 
 ##### Dag
@@ -797,158 +2343,23 @@ const dag = builder(JSON.parse(data))
 
 #### Endpoints
 
-**The endpoints will be REMOVED or CHANGED in 1.3.0 please wait until then to use them :)**
-
 Valid queries are:
-  - cardinaldagprime
-  - cardinaldagprimeforte
-  - cardinallinkprime
-  - cardinallinkprimeforte
-  - strictdagprime
-  - strictdagprimeforte
-  - strictlinkprime
-  - strictlinkprimeforte
-
-Some examples of the output:
-```ts
-// GET /api/data/d3/cardinaldagprime
-{
-  "size": {
-    "width": 11950,
-    "height": 1900
-  },
-  "nodes": [
-    {
-      "x": 5450,
-      "y": 200,
-      "data": "[\"0\"]"
-    },
-     ...
-   ],
-  "links": [
-    {
-      "source": 0,
-      "target": 8,
-      "points": [
-        [
-          5497.4341649025255,
-          215.81138830084188
-        ],
-        [
-          5852.5658350974745,
-          334.1886116991581
-        ]
-      ],
-      "data": {
-        "source": "[\"0\"]",
-        "target": "[\"0\",\"1\"]"
-      }
-    },
-     ...
-   ],
-   "v": 1
-}
-// GET /api/data/d3/cardinaldagprimeforte
-{
-  "size": {
-    "width": 11950,
-    "height": 1900
-  },
-  "nodes": [
-    {
-      "x": 5450,
-      "y": 200,
-      "data": "[\"0\"]|1-1"
-    },
-     ...
-   ],
-  "links": [
-    {
-      "source": 0,
-      "target": 8,
-      "points": [
-        [
-          5497.4341649025255,
-          215.81138830084188
-        ],
-        [
-          5852.5658350974745,
-          334.1886116991581
-        ]
-      ],
-      "data": {
-        "source": "[\"0\"]|1-1",
-        "target": "[\"0\",\"1\"]|2-1"
-      }
-    },
-     ...
-   ],
-   "v": 1
-}
-// GET /api/data/d3/cardinallinkprime
-[
-  {
-    "source": "[\"\"]",
-    "target": "[\"0\"]"
-  },
-   ...
-]
-// GET /api/data/d3/cardinallinkprimeforte
-[
-  {
-    "source": "[\"\"]|0-1",
-    "target": "[\"0\"]|1-1"
-  },
-   ...
-]
-```
-
-## Using this API in your app
-
-### Simple Client-Side Validation
-
-This is a basic example of how you can implement client-side validation with a max length and regex for the query endpoint.
-
-- Please note, that queries can be formatted correctly but not found thus giving a 400 status code. The main idea of using regex is to prevent the user from hitting the API when their input is invalid.
-
-You can ignore the regex if you do not care if the user might hit the API more often due to invalid input.
-
-```ts
-// Max Length Example: number,primeForm,vec,z,complement
-isDataValidLength = input.length > 33;
-dataRegex = /^((number|primeForm|vec|z|complement)(,(number|primeForm|vec|z|complement))*)$/;
-
-// Max Length Example: 0-1,1-1,2-1,2-2,2-3,2-4,2-5,2-6,3-2A,3-2B,3-3A,3-3B,3-4A,3-4B,3-5A,3-5B,3-6,3-7A,3-7B,3-8A,3-8B,4-2A
-isNumberValidLength = input.length > 100;
-numberRegex =
-	/^(((\^?[1-9]?[0-9]-z?[1-9]?[0-9][AB]?\$?|\^[1-9]?[0-9]|\^[1-9]?[0-9]-|\^[1-9]?[0-9]-z?|\^[1-9]?[0-9]-z?[1-9]?[0-9]|[AB]\$|[1-9]?[0-9][AB]?\$|z?[1-9]?[0-9][AB]?\$|-z?[1-9]?[0-9][AB]?\$)|([1-9]?[0-9]-z?[1-9]?[0-9][AB]?~[1-9]?[0-9]-z?[1-9]?[0-9][AB]?))(,\^?[1-9]?[0-9]-z?[1-9]?[0-9][AB]?\$?|,\^[1-9]?[0-9]|,\^[1-9]?[0-9]-|,\^[1-9]?[0-9]-z?|,\^[1-9]?[0-9]-z?[1-9]?[0-9]|,[AB]\$|,[1-9]?[0-9][AB]?\$|,z?[1-9]?[0-9][AB]?\$|,-z?[1-9]?[0-9][AB]?\$|,[1-9]?[0-9]-z?[1-9]?[0-9][AB]?~[1-9]?[0-9]-z?[1-9]?[0-9][AB]?)*)$/;
-
-// Max Length Example: [0,1,2,3,4,5,6,7,8,9,T,E]
-isNumberValidLength = input.length > 25;
-primeFormRegex =
-	/^(\[(0)?(,1)?(,2)?(,3)?(,4)?(,5)?(,6)?(,7)?(,8)?(,9)?(,T)?(,E)?]|(?!._(.)._\14)[0-9TE]{1,12})$/;
-
-// Max Length Example: <1,1,1,1,1,1>
-isVecValidLength = input.length > 13;
-vecRegex = /^<[0-9TEC],[0-9TEC],[0-9TEC],[0-9TEC],[0-9TEC],[0-9TEC]>|[0-9TECX]{6,6}$/;
-
-// Max Length Example: ^4-z15A$
-isZValidLength = input.length > 8;
-zRegex =
-	/^(null|\^?[1-9]?[0-9]-z[1-9]?[0-9][AB]?\$?|\^[1-9]?[0-9]|\^[1-9]?[0-9]-|\^[1-9]?[0-9]-z|\^[1-9]?[0-9]-z[1-9]?[0-9]|[AB]\$|[1-9]?[0-9][AB]?\$|z[1-9]?[0-9][AB]?\$|-z[1-9]?[0-9][AB]?\$)$/;
-
-// Max Length Example: ^4-z15A$
-isComplementValidLength = input.length > 8;
-complementRegex =
-	/^(null|\^?[1-9]?[0-9]-z?[1-9]?[0-9][AB]?\$?|\^[1-9]?[0-9]|\^[1-9]?[0-9]-|\^[1-9]?[0-9]-z?|\^[1-9]?[0-9]-z?[1-9]?[0-9]|[AB]\$|[1-9]?[0-9][AB]?\$|z?[1-9]?[0-9][AB]?\$|-z?[1-9]?[0-9][AB]?\$)$/;
-
-isD3ValidLength = input.length > 22;
-d3Regex = /^cardinaldagprime|strictdagprime|cardinaldagprimeforte|strictdagprimeforte|cardinallinkprime|strictlinkprime|cardinallinkprimeforte|strictlinkprimeforte$/;
-```
+  - cardinalinversiondag
+  - cardinalinversionlinks
+  - cardinaloriginaldag
+  - cardinaloriginallinks
+  - strictinversiondag
+  - strictinversionlinks
+  - strictoriginaldag
+  - strictoriginallinks
+  - vectorinversiondag
+  - vectorinversionlinks
+  - vectororiginaldag
+  - vectororiginallinks
 
 ## API Development
 
-Run ```npm i``` and uncomment ```app.listen(...)```
+Run ```npm i```
 
 ### Add .env File
 
