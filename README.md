@@ -17,7 +17,7 @@ Forte API is a music theory API that provides a way to query set classes in 12 t
 ##
 
 **Currently this API is live [here](https://hcda8f8dtk.execute-api.us-east-1.amazonaws.com/prod/api/data/) using AWS API Gateway + AWS Lambda!**
-**Check out the OpenAPI docs on SwaggerHub [here](https://app.swaggerhub.com/apis-docs/NinjaNas/ForteAPI/1.3.0)!**
+**Check out the OpenAPI docs on SwaggerHub [here](https://app.swaggerhub.com/apis-docs/NinjaNas/ForteAPI/1.3.1)!**
 
 **The API is rate-limited at 500 requests per day. Make an issue if you need more requests.**
 
@@ -116,6 +116,7 @@ Forte API is a music theory API that provides a way to query set classes in 12 t
     - [Vector-Similarity](#vector-similarity)
     - [Original vs Inversion](#original-vs-inversion)
     - [Manual Construction](#manual-construction)
+        - [Fetch](#fetch)
     	- [Links](#links)
      	- [Dag](#dag)
     - [How to Use JSON in D3Dag](#how-to-use-json-in-d3dag)
@@ -2172,6 +2173,34 @@ Inversion means with inversions so it includes both A and B sets.
 
 The json files here can be recreated using the set_classes.json file.
 
+##### Fetch
+
+```ts
+type Link = { source: string; target: string }
+const links = ref<null | Link[]>(null)
+
+const fetchData = async () => {
+  try {
+    const res = await fetch(
+      'https://hcda8f8dtk.execute-api.us-east-1.amazonaws.com/prod/api/data/number,primeForm,vec/',
+      { signal: abortController.signal }
+    )
+    if (res.ok) {
+      const data: { number: string; primeForm: string; vec: string }[] = await res.json()
+      links.value = linkBuilder(data)
+      localStorage.setItem('links', JSON.stringify(links.value))
+    } else {
+      console.log('Not 200')
+    }
+  } catch (error) {
+    if ((error as Error).name == 'AbortError') {
+      console.log('AbortError', error)
+    }
+    console.log(error)
+  }
+}
+```
+
 ##### Links
 ```ts
 // Cardinality-Increasing
@@ -2244,11 +2273,11 @@ const linkBuilder = (
   }))
   let links: Link[] = [{ source: '[""]|0-1|000000', target: '["0"]|1-1|000000' }]
 
-  for (const s of newData) {
+  for (const [i, s] of newData.entries()) {
     let max = 0
     let newS = null
     let newT = null
-    for (const t of newData) {
+    for (const [j, t] of newData.entries()) {
       const sVec = s.vec.replace(/[<>]/g, '').replace(/C/g, '12').replace(/T/g, '10').split(',')
       const tVec = t.vec.replace(/[<>]/g, '').replace(/C/g, '12').replace(/T/g, '10').split(',')
 
@@ -2260,11 +2289,7 @@ const linkBuilder = (
         (Math.sqrt(sVec.reduce((sum, val) => sum + parseInt(val) * parseInt(val), 0)) *
           Math.sqrt(tVec.reduce((sum, val) => sum + parseInt(val) * parseInt(val), 0)))
 
-      if (
-        s.vec !== t.vec &&
-        t.number > s.number &&
-        cosSim > max
-      ) {
+      if (i < j && cosSim > max) {
         max = cosSim
         newS = s
         newT = t
@@ -2291,6 +2316,8 @@ const linkBuilder = (
       })
     }
   }
+  return links
+}
 
 // For original dags add this to the condition
 !s.number.endsWith('B') &&
