@@ -28,7 +28,7 @@
 		"serverless-http": "^3.2.0"
 	},
 	"devDependencies": {
-		"@types/chai": "^4.3.9",
+		"@types/chai": "^4.3.10",
 		"@types/cors": "^2.8.14",
 		"@types/dotenv": "^8.2.0",
 		"@types/express": "^4.17.20",
